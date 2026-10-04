@@ -1,5 +1,5 @@
 // ===== ISI SATU KALI DI SINI =====
-const BACKEND_URL = "http://IP_PANEL:PORT";   // contoh: "http://123.45.67.89:3530"
+const BACKEND_URL = "http://157.15.40.44:3530";   // contoh: "http://123.45.67.89:3530"
 // =================================
 
 export default async function handler(req, res) {
