@@ -1,5 +1,5 @@
 // ===== EDIT SATU BARIS INI SAJA =====
-const BACKEND_URL = "http://GANTI-DOMAIN-ALLOCATION:PORT";
+const BACKEND_URL = "https://erine.jkt48node.id:3530";
 // Contoh: "http://node1.namahosting.com:2345"
 // ====================================
 
