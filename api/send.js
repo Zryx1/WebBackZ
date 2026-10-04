@@ -1,5 +1,5 @@
 // ===== GANTI 3 BARIS INI =====
-const BACKEND_URL = "http://IP_PANEL:PORT";
+const BACKEND_URL = "http://157.15.40.44:3530";
 const BACKEND_SECRET = "SECRET_RAHASIA_LU";
 // ============================
 
