@@ -1,18 +1,17 @@
-// ===== EDIT SATU BARIS INI SAJA =====
-const BACKEND_URL = "https://erine.jkt48node.id:3530";
-// Contoh: "http://node1.namahosting.com:2345"
-// ====================================
-
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false });
+  const { backend, name, message } = req.body || {};
+  if (!backend || !/^https?:\/\//.test(backend)) {
+    return res.status(400).json({ ok: false, error: "Alamat backend tidak valid" });
+  }
   try {
-    const r = await fetch(BACKEND_URL + "/api/send", {
+    const r = await fetch(backend.replace(/\/+$/, "") + "/api/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({ name, message })
     });
     res.status(r.status).json(await r.json());
   } catch (e) {
-    res.status(502).json({ ok: false, error: "Backend tidak terjangkau" });
+    res.status(502).json({ ok: false, error: "Backend tidak terjangkau: " + e.message });
   }
 }
