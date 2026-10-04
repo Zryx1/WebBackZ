@@ -1,18 +1,17 @@
-// Vercel Serverless Function: meneruskan request ke panel
-// (menghindari error mixed content HTTPS -> HTTP)
+// ===== EDIT SATU BARIS INI SAJA =====
+const BACKEND_URL = "http://GANTI-DOMAIN-ALLOCATION:PORT";
+// Contoh: "http://node1.namahosting.com:2345"
+// ====================================
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false });
   try {
-    const r = await fetch(process.env.BACKEND_URL + "/api/send", {
+    const r = await fetch(BACKEND_URL + "/api/send", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-secret": process.env.API_SECRET || ""
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req.body)
     });
-    const data = await r.json();
-    res.status(r.status).json(data);
+    res.status(r.status).json(await r.json());
   } catch (e) {
     res.status(502).json({ ok: false, error: "Backend tidak terjangkau" });
   }
