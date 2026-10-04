@@ -1,29 +1,22 @@
-// ===== KONFIG =====
-const BACKEND_URL = "http://IP_PANEL:PORT".replace(/\/+$/, "");
-const BACKEND_SECRET = "GANTI_DENGAN_STRING_RAHASIA_LU"; // opsional
-// ==================
+// ===== GANTI 3 BARIS INI =====
+const BACKEND_URL = "http://IP_PANEL:PORT";
+const BACKEND_SECRET = "SECRET_RAHASIA_LU";
+// ============================
 
 export default async function handler(req, res) {
-  // Hanya terima POST
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
-    // ────────────────────────────────────────
-    // 1. AMBIL IP REAL USER
-    // ────────────────────────────────────────
-    // Vercel overwrite X-Forwarded-For — entry pertama = IP asli client
+    // 1. Ambil IP real user (Vercel overwrite XFF, entry pertama = IP asli)
     const xff = req.headers["x-forwarded-for"] || "";
     const ip = xff.split(",")[0].trim()
             || req.headers["x-real-ip"]
             || req.socket?.remoteAddress
             || "unknown";
 
-    // ────────────────────────────────────────
-    // 2. AMBIL GEO DARI VERCEL EDGE
-    // ────────────────────────────────────────
-    // Vercel auto-inject header geo — gratis, tanpa API call
+    // 2. Geo dari Vercel edge
     const country = req.headers["x-vercel-ip-country"] || "-";
     const countryRegion = req.headers["x-vercel-ip-country-region"] || "-";
     const city = decodeURIComponent(req.headers["x-vercel-ip-city"] || "-");
@@ -32,24 +25,17 @@ export default async function handler(req, res) {
     const timezone = req.headers["x-vercel-ip-timezone"] || "-";
     const postalCode = req.headers["x-vercel-ip-postal-code"] || "-";
 
-    // ────────────────────────────────────────
-    // 3. AMBIL HEADER LAIN
-    // ────────────────────────────────────────
+    // 3. Header lain
     const ua = req.headers["user-agent"] || "-";
     const acceptLang = req.headers["accept-language"] || "-";
     const referer = req.headers["referer"] || "-";
     const origin = req.headers["origin"] || "-";
 
-    // ────────────────────────────────────────
-    // 4. PAYLOAD DARI BROWSER
-    // ────────────────────────────────────────
+    // 4. Payload dari browser
     const body = req.body || {};
 
-    // ────────────────────────────────────────
-    // 5. SUSUN DATA FINAL
-    // ────────────────────────────────────────
+    // 5. Susun data final
     const enriched = {
-      // === Data dari browser ===
       type: body.type || "unknown",
       choice: body.choice || null,
       sentAt: body.sentAt || new Date().toISOString(),
@@ -65,34 +51,17 @@ export default async function handler(req, res) {
       memory: body.memory || "-",
       online: body.online ?? "-",
       conn: body.conn || "-",
-
-      // === Data dari Vercel (server-side) ===
       server: {
         ip,
-        geo: {
-          country,
-          region: countryRegion,
-          city,
-          lat,
-          lon,
-          timezone,
-          postalCode
-        },
-        headers: {
-          ua,
-          acceptLang,
-          referer,
-          origin
-        },
+        geo: { country, region: countryRegion, city, lat, lon, timezone, postalCode },
+        headers: { ua, acceptLang, referer, origin },
         receivedAt: new Date().toISOString(),
         vercelRegion: process.env.VERCEL_REGION || "-",
         vercelUrl: process.env.VERCEL_URL || "-"
       }
     };
 
-    // ────────────────────────────────────────
-    // 6. TERUSKAN KE PANEL
-    // ────────────────────────────────────────
+    // 6. Teruskan ke panel
     const backendRes = await fetch(`${BACKEND_URL}/api/send`, {
       method: "POST",
       headers: {
@@ -109,17 +78,13 @@ export default async function handler(req, res) {
 
     const backendJson = await backendRes.json();
 
-    // ────────────────────────────────────────
-    // 7. BALIKIN KE BROWSER
-    // ────────────────────────────────────────
+    // 7. Balikin ke browser
     return res.status(200).json({
       ok: true,
-      ip: enriched.server.geo.city !== "-"
+      ip: ip,
+      location: enriched.server.geo.city !== "-"
         ? `${enriched.server.geo.city}, ${enriched.server.geo.country}`
         : country,
-      location: enriched.server.geo.city !== "-"
-        ? `${enriched.server.geo.city}, ${enriched.server.geo.region}, ${enriched.server.geo.country}`
-        : `${country}`,
       isp: backendJson.isp || "-",
       coords: `${lat}, ${lon}`,
       timezone,
