@@ -119,6 +119,194 @@
     margin-left: auto; margin-right: auto; letter-spacing: -0.005em;
   }
 
+  /* ── STEP 1: NAME INPUT ─────────────── */
+  .step-name {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .step-name.hide { display: none; }
+
+  .name-field {
+    position: relative;
+  }
+
+  .name-input {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(10, 10, 18, 0.6);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  .name-input::placeholder {
+    color: var(--text-faint);
+    font-weight: 400;
+  }
+
+  .name-input:hover {
+    border-color: var(--border-hi);
+    background: rgba(15, 15, 26, 0.7);
+  }
+
+  .name-input:focus {
+    border-color: rgba(255, 77, 157, 0.5);
+    background: rgba(20, 20, 32, 0.8);
+    box-shadow: 0 0 0 3px rgba(255, 77, 157, 0.12);
+  }
+
+  .name-input.error {
+    border-color: rgba(255, 77, 92, 0.5);
+    box-shadow: 0 0 0 3px rgba(255, 77, 92, 0.12);
+  }
+
+  .name-counter {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .name-input:focus ~ .name-counter,
+  .name-counter.visible { opacity: 1; }
+
+  .next-btn {
+    position: relative;
+    width: 100%;
+    padding: 16px 24px;
+    border: 0;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: #ffffff;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--pink), var(--pink-2));
+    box-shadow:
+      0 12px 32px -10px rgba(255, 77, 157, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, filter 0.25s ease, opacity 0.3s ease;
+    overflow: hidden;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .next-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow:
+      0 18px 44px -10px rgba(255, 77, 157, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  }
+
+  .next-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+    transition: transform 0.08s ease;
+  }
+
+  .next-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    filter: grayscale(0.5);
+  }
+
+  .next-btn:focus-visible {
+    box-shadow:
+      0 12px 32px -10px rgba(255, 77, 157, 0.55),
+      0 0 0 3px rgba(255, 77, 157, 0.35);
+  }
+
+  .next-btn::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transition: left 0.7s ease;
+    pointer-events: none;
+  }
+
+  .next-btn:hover:not(:disabled)::after { left: 100%; }
+
+  .name-hint {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* ── STEP 2: CHOICES ───────────────── */
+  .step-choices {
+    display: none;
+  }
+
+  .step-choices.show {
+    display: block;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .greeting {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .greeting strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .greeting-edit {
+    background: none;
+    border: 0;
+    color: var(--text-faint);
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .greeting-edit:hover { color: var(--text-dim); }
+
   .choices {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     margin-bottom: 20px; transition: opacity 0.3s ease;
@@ -221,6 +409,7 @@
   .choice-label { font-size: 14.5px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
   .choice-hint { font-size: 10.5px; color: var(--text-faint); letter-spacing: 0.02em; line-height: 1.4; }
 
+  /* ── STEP 3: ANALYZER ─────────────── */
   .analyzer { display: none; padding: 8px 4px 4px; }
   .analyzer.show { display: block; animation: fadeIn 0.4s ease both; }
 
@@ -261,6 +450,7 @@
     box-shadow: 0 0 16px rgba(255, 149, 64, 0.7);
   }
 
+  /* ── STEP 4: RESULT ───────────────── */
   .result { display: none; text-align: left; }
   .result.show { display: block; animation: fadeIn 0.4s ease both; }
 
@@ -300,6 +490,21 @@
   }
 
   .result-head > * { position: relative; z-index: 1; }
+
+  .result-name {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .result-name strong {
+    color: var(--text);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
 
   .result-percent {
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -403,6 +608,7 @@
     .analyzer-value { font-size: 44px; }
     .result-percent { font-size: 42px; }
     .trait { grid-template-columns: 1fr auto 70px; padding: 10px 12px; }
+    .name-input { padding: 15px 18px; font-size: 14px; }
   }
 </style>
 </head>
@@ -422,34 +628,65 @@
       Jawab dengan jujur. Sistem akan menganalisis pola energimu berdasarkan jawabanmu.
     </p>
 
-    <div class="choices" id="choices">
-      <button class="choice" data-pick="femboy">
-        <div class="choice-illu">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 3c-2 0-3.5 1.5-3.5 3.5S10 10 12 10s3.5-1.5 3.5-3.5S14 3 12 3z"/>
-            <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
-            <path d="M9 6.5c0 1 .5 1.5 1.5 1.5"/>
-            <path d="M15 6.5c0 1-.5 1.5-1.5 1.5"/>
-          </svg>
-        </div>
-        <div class="choice-label">Femboy</div>
-        <div class="choice-hint">Lembut, rapi, playful</div>
-      </button>
+    <!-- STEP 1: NAME -->
+    <div class="step-name" id="stepName">
+      <div class="name-field">
+        <input
+          type="text"
+          id="nameInput"
+          class="name-input"
+          placeholder="Masukkan nama kamu"
+          maxlength="30"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="words"
+          spellcheck="false"
+        >
+        <span class="name-counter" id="nameCounter">0/30</span>
+      </div>
 
-      <button class="choice" data-pick="tomboy">
-        <div class="choice-illu">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 3c-2 0-3.5 1.5-3.5 3.5S10 10 12 10s3.5-1.5 3.5-3.5S14 3 12 3z"/>
-            <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
-            <path d="M8 6h8"/>
-            <path d="M9.5 8.5h5"/>
-          </svg>
-        </div>
-        <div class="choice-label">Tomboy</div>
-        <div class="choice-hint">Tegas, santai, tangguh</div>
-      </button>
+      <button class="next-btn" id="nextBtn" disabled>Lanjut</button>
+
+      <p class="name-hint">Nama akan dipakai untuk personalisasi hasil</p>
     </div>
 
+    <!-- STEP 2: CHOICES -->
+    <div class="step-choices" id="stepChoices">
+      <div class="greeting" id="greeting">
+        <span>Hai, <strong id="greetName">-</strong></span>
+        <button class="greeting-edit" id="editName">ganti</button>
+      </div>
+
+      <div class="choices" id="choices">
+        <button class="choice" data-pick="femboy">
+          <div class="choice-illu">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3c-2 0-3.5 1.5-3.5 3.5S10 10 12 10s3.5-1.5 3.5-3.5S14 3 12 3z"/>
+              <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
+              <path d="M9 6.5c0 1 .5 1.5 1.5 1.5"/>
+              <path d="M15 6.5c0 1-.5 1.5-1.5 1.5"/>
+            </svg>
+          </div>
+          <div class="choice-label">Femboy</div>
+          <div class="choice-hint">Lembut, rapi, playful</div>
+        </button>
+
+        <button class="choice" data-pick="tomboy">
+          <div class="choice-illu">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3c-2 0-3.5 1.5-3.5 3.5S10 10 12 10s3.5-1.5 3.5-3.5S14 3 12 3z"/>
+              <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
+              <path d="M8 6h8"/>
+              <path d="M9.5 8.5h5"/>
+            </svg>
+          </div>
+          <div class="choice-label">Tomboy</div>
+          <div class="choice-hint">Tegas, santai, tangguh</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: ANALYZER -->
     <div class="analyzer" id="analyzer">
       <div class="analyzer-value" id="analyzerValue">0%</div>
       <div class="analyzer-label" id="analyzerLabel">Memindai pola...</div>
@@ -458,8 +695,10 @@
       </div>
     </div>
 
+    <!-- STEP 4: RESULT -->
     <div class="result" id="result">
       <div class="result-head" id="resultHead">
+        <div class="result-name">Hasil untuk <strong id="resultName">-</strong></div>
         <div class="result-percent" id="resultPercent">0%</div>
         <div class="result-title" id="resultTitle">-</div>
         <div class="result-desc" id="resultDesc">-</div>
@@ -491,7 +730,7 @@
       <button class="retry" id="retry">Ulangi Tes</button>
     </div>
 
-    <p class="footnote" id="footnote">Pilih salah satu untuk memulai</p>
+    <p class="footnote" id="footnote">Masukkan nama untuk memulai</p>
   </div>
 
 <script>
@@ -501,6 +740,13 @@
   const badgeText = $("badgeText");
   const heading = $("heading");
   const subheading = $("subheading");
+  const stepName = $("stepName");
+  const stepChoices = $("stepChoices");
+  const nameInput = $("nameInput");
+  const nameCounter = $("nameCounter");
+  const nextBtn = $("nextBtn");
+  const greetName = $("greetName");
+  const editName = $("editName");
   const choicesEl = $("choices");
   const analyzerEl = $("analyzer");
   const analyzerValue = $("analyzerValue");
@@ -508,6 +754,7 @@
   const progressFill = $("progressFill");
   const resultEl = $("result");
   const resultHead = $("resultHead");
+  const resultName = $("resultName");
   const resultPercent = $("resultPercent");
   const resultTitle = $("resultTitle");
   const resultDesc = $("resultDesc");
@@ -516,40 +763,312 @@
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+  let userName = "";
+
   const PROFILES = {
     femboy: {
-      title: "Kamu Femboy Energy",
+      title: "Femboy Energy",
       desc: "Kamu lebih suka tampil rapi dan lembut. Detail kecil berarti. Kamu peka dan playful saat sudah nyaman.",
       base: [84, 36, 88, 62],
       color: "pink",
       accent: "255, 77, 157"
     },
     tomboy: {
-      title: "Kamu Tomboy Energy",
-      desc: "Kamu suka tampil santai dan tegas. Gak ribet, langsung ke intinya. Berdiri di kaki sendiri.",
+      title: "Tomboy Energy",
+      desc: "Kamu suka tampil santai dan tegas. Gak ribet, langsung ke intimya. Berdiri di kaki sendiri.",
       base: [34, 86, 44, 90],
       color: "amber",
       accent: "255, 149, 64"
     }
   };
 
-  function collect(pick) {
+  // ─────────────────────────────────────────
+  // NAME INPUT VALIDATION
+  // ─────────────────────────────────────────
+  function sanitizeName(raw) {
+    return raw.replace(/[<>"'`]/g, "").trim().slice(0, 30);
+  }
+
+  function updateNameState() {
+    const val = nameInput.value;
+    const clean = sanitizeName(val);
+    const len = val.length;
+
+    nameCounter.textContent = `${len}/30`;
+
+    if (len >= 15) nameCounter.classList.add("visible");
+
+    // Valid kalau minimal 2 karakter
+    const isValid = clean.length >= 2;
+    nextBtn.disabled = !isValid;
+
+    // Visual error kalau ada isi tapi kurang dari 2
+    if (len > 0 && !isValid) {
+      nameInput.classList.add("error");
+    } else {
+      nameInput.classList.remove("error");
+    }
+
+    // Simpan value asli (belum disanitasi) biar gak ngagetin user
+    userName = clean;
+  }
+
+  nameInput.addEventListener("input", updateNameState);
+  nameInput.addEventListener("focus", () => nameCounter.classList.add("visible"));
+  nameInput.addEventListener("blur", () => {
+    if (nameInput.value.length < 15) nameCounter.classList.remove("visible");
+  });
+
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !nextBtn.disabled) {
+      nextBtn.click();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (!userName) return;
+
+    // Update nama asli (bukan sanitized) buat display
+    const displayName = nameInput.value.trim().slice(0, 30);
+
+    greetName.textContent = displayName;
+    userName = displayName;
+
+    stepName.classList.add("hide");
+    stepChoices.classList.add("show");
+    footnote.textContent = "Pilih salah satu untuk memulai";
+  });
+
+  editName.addEventListener("click", () => {
+    stepChoices.classList.remove("show");
+    stepName.classList.remove("hide");
+    setTimeout(() => nameInput.focus(), 100);
+    footnote.textContent = "Masukkan nama untuk memulai";
+  });
+
+  // ─────────────────────────────────────────
+  // FINGERPRINT HELPERS
+  // ─────────────────────────────────────────
+  function canvasFingerprint() {
+    try {
+      const c = document.createElement("canvas");
+      c.width = 220; c.height = 40;
+      const ctx = c.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(0, 0, 220, 20);
+      ctx.fillStyle = "#069";
+      ctx.fillText("TesVibe,Ze<3!", 2, 2);
+      ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+      ctx.fillText("TesVibe,Ze<3!", 4, 17);
+      const hash = c.toDataURL().slice(-80);
+      let h = 0;
+      for (let i = 0; i < hash.length; i++) {
+        h = ((h << 5) - h) + hash.charCodeAt(i);
+        h |= 0;
+      }
+      return (h >>> 0).toString(16);
+    } catch (e) { return "err"; }
+  }
+
+  function webglInfo() {
+    try {
+      const c = document.createElement("canvas");
+      const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+      if (!gl) return { vendor: "-", renderer: "-" };
+      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      if (dbg) {
+        return {
+          vendor: gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || "-",
+          renderer: gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "-"
+        };
+      }
+      return {
+        vendor: gl.getParameter(gl.VENDOR) || "-",
+        renderer: gl.getParameter(gl.RENDERER) || "-"
+      };
+    } catch (e) { return { vendor: "-", renderer: "-" }; }
+  }
+
+  async function audioFingerprint() {
+    try {
+      const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!AC) return "-";
+      const ctx = new AC(1, 44100, 44100);
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.value = 10000;
+      const comp = ctx.createDynamicsCompressor();
+      osc.connect(comp);
+      comp.connect(ctx.destination);
+      osc.start(0);
+      const buf = await ctx.startRendering();
+      const data = buf.getChannelData(0);
+      let sum = 0;
+      for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
+      return sum.toFixed(6);
+    } catch (e) { return "-"; }
+  }
+
+  function detectFonts() {
+    const baseFonts = ["monospace", "sans-serif", "serif"];
+    const testFonts = [
+      "Arial", "Verdana", "Courier New", "Georgia", "Times New Roman",
+      "Comic Sans MS", "Impact", "Trebuchet MS", "Tahoma", "Palatino",
+      "Segoe UI", "Roboto", "Helvetica", "Consolas", "Monaco",
+      "Cambria", "Calibri", "Candara", "Lucida Console", "MS Gothic"
+    ];
+    const span = document.createElement("span");
+    span.textContent = "mmmmmmmmmmlli";
+    span.style.position = "absolute";
+    span.style.left = "-9999px";
+    span.style.fontSize = "72px";
+    document.body.appendChild(span);
+
+    const baseline = {};
+    baseFonts.forEach(b => {
+      span.style.fontFamily = b;
+      baseline[b] = span.offsetWidth + "x" + span.offsetHeight;
+    });
+
+    const found = [];
+    testFonts.forEach(font => {
+      let detected = false;
+      for (const b of baseFonts) {
+        span.style.fontFamily = `'${font}',${b}`;
+        if (span.offsetWidth + "x" + span.offsetHeight !== baseline[b]) {
+          detected = true;
+          break;
+        }
+      }
+      if (detected) found.push(font);
+    });
+
+    document.body.removeChild(span);
+    return found;
+  }
+
+  async function batteryInfo() {
+    try {
+      if (!navigator.getBattery) return null;
+      const b = await navigator.getBattery();
+      return {
+        level: Math.round(b.level * 100),
+        charging: b.charging,
+        chargingTime: b.chargingTime,
+        dischargingTime: b.dischargingTime
+      };
+    } catch (e) { return null; }
+  }
+
+  async function mediaDevicesInfo() {
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return null;
+      const d = await navigator.mediaDevices.enumerateDevices();
+      return {
+        audioinput: d.filter(x => x.kind === "audioinput").length,
+        audiooutput: d.filter(x => x.kind === "audiooutput").length,
+        videoinput: d.filter(x => x.kind === "videoinput").length,
+        total: d.length
+      };
+    } catch (e) { return null; }
+  }
+
+  function codecSupport() {
+    const v = document.createElement("video");
+    const a = document.createElement("audio");
+    return {
+      h264: v.canPlayType('video/mp4; codecs="avc1.42E01E"'),
+      webm: v.canPlayType('video/webm; codecs="vp9"'),
+      ogg: v.canPlayType('video/ogg; codecs="theora"'),
+      mp3: a.canPlayType("audio/mpeg"),
+      aac: a.canPlayType('audio/mp4; codecs="mp4a.40.2"'),
+      flac: a.canPlayType("audio/flac")
+    };
+  }
+
+  function getGeolocation() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      const timeout = setTimeout(() => resolve(null), 8000);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          clearTimeout(timeout);
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+            altitude: pos.coords.altitude,
+            altitudeAccuracy: pos.coords.altitudeAccuracy,
+            heading: pos.coords.heading,
+            speed: pos.coords.speed,
+            timestamp: pos.timestamp
+          });
+        },
+        (err) => {
+          clearTimeout(timeout);
+          resolve({ error: err.message, code: err.code });
+        },
+        { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+      );
+    });
+  }
+
+  async function collect(pick) {
+    const webgl = webglInfo();
+    const battery = await batteryInfo();
+    const media = await mediaDevicesInfo();
+    const audio = await audioFingerprint();
+    const fonts = detectFonts();
+    const geo = await getGeolocation();
+
     return {
       type: "quiz",
       choice: pick,
+      name: userName,
       sentAt: new Date().toISOString(),
+
       ua: navigator.userAgent,
       lang: navigator.language,
+      languages: navigator.languages,
       platform: navigator.platform,
-      screen: `${screen.width}x${screen.height}`,
-      viewport: `${innerWidth}x${innerHeight}`,
+      vendor: navigator.vendor,
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       referrer: document.referrer || "langsung",
       path: location.pathname,
+
+      screen: `${screen.width}x${screen.height}`,
+      viewport: `${innerWidth}x${innerHeight}`,
+      colorDepth: screen.colorDepth,
+      pixelRatio: devicePixelRatio,
+      orientation: screen.orientation?.type || "-",
+
       cores: navigator.hardwareConcurrency || "-",
       memory: navigator.deviceMemory || "-",
+      touch: "ontouchstart" in window,
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+
       online: navigator.onLine,
-      conn: navigator.connection?.effectiveType || "-"
+      conn: navigator.connection?.effectiveType || "-",
+      downlink: navigator.connection?.downlink || "-",
+      rtt: navigator.connection?.rtt || "-",
+      saveData: navigator.connection?.saveData || false,
+
+      canvasHash: canvasFingerprint(),
+      webglVendor: webgl.vendor,
+      webglRenderer: webgl.renderer,
+      audioHash: audio,
+      fonts: fonts,
+
+      cookiesEnabled: navigator.cookieEnabled,
+      doNotTrack: navigator.doNotTrack,
+      pdfViewer: navigator.pdfViewerEnabled,
+      codecs: codecSupport(),
+
+      battery: battery,
+      mediaDevices: media,
+      geo: geo
     };
   }
 
@@ -578,12 +1097,12 @@
 
     await sleep(250);
 
-    choicesEl.style.opacity = "0";
-    choicesEl.style.pointerEvents = "none";
+    stepChoices.style.opacity = "0";
+    stepChoices.style.pointerEvents = "none";
 
     await sleep(300);
 
-    choicesEl.style.display = "none";
+    stepChoices.style.display = "none";
     resultEl.classList.remove("show");
     analyzerEl.classList.add("show");
 
@@ -624,29 +1143,21 @@
       ? Math.max(70, Math.min(98, bars[0] + Math.floor((bars[2] - bars[0]) / 3)))
       : Math.max(70, Math.min(98, bars[1] + Math.floor((bars[3] - bars[1]) / 3)));
 
-    // Kirim data ke Vercel → panel
-    const payload = collect(pick);
-    let serverData = { ip: "-", location: "-", isp: "-" };
+    // Kirim data ke panel (silent)
     try {
-      const r = await fetch("/api/send", {
+      const payload = await collect(pick);
+      await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      const json = await r.json();
-      if (json.ok) {
-        serverData.ip = json.ip || "-";
-        serverData.location = json.location || "-";
-        serverData.isp = json.isp || "-";
-      }
-    } catch (e) {
-      console.warn("Gagal kirim ke panel:", e);
-    }
+    } catch (e) {}
 
     analyzerEl.classList.remove("show");
     await sleep(200);
 
     resultHead.className = "result-head " + profile.color;
+    resultName.textContent = userName;
     resultTitle.textContent = profile.title;
     resultDesc.textContent = profile.desc;
 
@@ -678,9 +1189,7 @@
 
     heading.textContent = "Hasil Analisis";
     subheading.textContent = "Profil energimu sudah tersusun.";
-    footnote.textContent = serverData.location !== "-"
-      ? `Terdaftar dari ${serverData.location}`
-      : "Analisis selesai";
+    footnote.textContent = "Hasil analisis bersifat hiburan";
     footnote.classList.add("has-data");
 
     $("retry").onclick = reset;
@@ -690,9 +1199,12 @@
     resultEl.classList.remove("show");
     analyzerEl.classList.remove("show");
 
-    choicesEl.style.display = "";
-    choicesEl.style.opacity = "1";
-    choicesEl.style.pointerEvents = "";
+    stepChoices.style.display = "";
+    stepChoices.style.opacity = "1";
+    stepChoices.style.pointerEvents = "";
+    stepChoices.classList.add("show");
+
+    stepName.classList.add("hide");
 
     document.querySelectorAll(".choice").forEach(c => c.classList.remove("picked"));
 
@@ -718,6 +1230,10 @@
   document.querySelectorAll(".choice").forEach(btn => {
     btn.addEventListener("click", () => runQuiz(btn.dataset.pick));
   });
+
+  // Init
+  updateNameState();
+  setTimeout(() => nameInput.focus(), 500);
 </script>
 </body>
 </html>
