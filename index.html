@@ -3,45 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kirim ke Panel</title>
+<title>Tes Request ke Panel</title>
 <style>
   body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px}
-  form{background:#1e293b;padding:24px;border-radius:12px;width:100%;max-width:380px;display:grid;gap:12px}
+  .box{background:#1e293b;padding:24px;border-radius:12px;width:100%;max-width:380px;display:grid;gap:10px}
   input,textarea,button{padding:12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font:inherit}
   button{background:#2563eb;border:0;cursor:pointer;font-weight:600}
-  #status{min-height:1.2em;font-size:.9rem}
+  button.alt{background:#334155}
+  pre{background:#0f172a;border-radius:8px;padding:10px;margin:0;font-size:.8rem;white-space:pre-wrap;min-height:3em}
 </style>
 </head>
 <body>
-<form id="f">
-  <h2 style="margin:0">Kirim ke Panel</h2>
-  <input id="backend" placeholder="Alamat backend" value="http://" required>
-  <input id="name" placeholder="Nama" required>
-  <textarea id="message" placeholder="Pesan" rows="3" required></textarea>
-  <button>Kirim</button>
-  <div id="status"></div>
-</form>
+<div class="box">
+  <h2 style="margin:0">Tes Request ke Panel</h2>
+  <button class="alt" onclick="kirim('ping')">Ping</button>
+  <input id="name" placeholder="Nama" value="Tester">
+  <textarea id="message" rows="2" placeholder="Pesan">Halo dari web</textarea>
+  <button onclick="kirim('pesan')">Kirim pesan</button>
+  <button class="alt" onclick="kirim('data')">Kirim data acak</button>
+  <pre id="out">Hasil muncul di sini. Lihat juga console panel.</pre>
+</div>
 <script>
-document.getElementById("f").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const s = document.getElementById("status");
-  s.textContent = "Mengirim...";
-  try {
-    const r = await fetch("/api/send", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        backend: document.getElementById("backend").value.trim(),
-        name: document.getElementById("name").value,
-        message: document.getElementById("message").value
-      })
-    });
-    const d = await r.json();
-    s.textContent = d.ok ? "Terkirim, cek console panel." : "Gagal: " + (d.error || r.status);
-  } catch (err) {
-    s.textContent = "Gagal terhubung.";
+async function kirim(type) {
+  const out = document.getElementById("out");
+  out.textContent = "Mengirim...";
+  const payload = { type, sentAt: new Date().toISOString() };
+  if (type === "pesan") {
+    payload.name = document.getElementById("name").value;
+    payload.message = document.getElementById("message").value;
   }
-});
+  if (type === "data") {
+    payload.data = { angka: Math.floor(Math.random() * 1000), id: Math.random().toString(36).slice(2, 8), ua: navigator.userAgent };
+  }
+  try {
+    const r = await fetch("/api/send", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
+    out.textContent = JSON.stringify(await r.json(), null, 2);
+  } catch (e) {
+    out.textContent = "Gagal terhubung: " + e.message;
+  }
+}
 </script>
 </body>
 </html>
