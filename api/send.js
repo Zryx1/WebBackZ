@@ -1,5 +1,5 @@
 // ===== GANTI 1 BARIS INI =====
-const BACKEND_URL = "http://IP_PANEL:PORT";
+const BACKEND_URL = "http://172.232.248.196:3000";
 // ============================
 
 export default async function handler(req, res) {
