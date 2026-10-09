@@ -3,23 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#060810">
-<title>Cuaca di Lokasimu</title>
+<meta name="theme-color" content="#0b0614">
+<title>CPS Test</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   :root {
-    --bg: #060810;
-    --text: #f0f4ff;
-    --text-dim: #8892a8;
-    --text-faint: #5a6478;
-    --border: rgba(255, 255, 255, 0.08);
-    --border-hi: rgba(255, 255, 255, 0.16);
-    --sky: #4dabff;
-    --sky-2: #6dd5ff;
-    --sky-glow: rgba(77, 171, 255, 0.5);
+    --bg: #0b0614;
+    --text: #f5f2ff;
+    --text-dim: #9a8fb8;
+    --text-faint: #514668;
+    --accent: #a78bfa;
+    --accent-2: #c4b5fd;
+    --accent-deep: #7c3aed;
+    --surface: #17101f;
+    --surface-2: #1e1529;
+    --border: rgba(167, 139, 250, 0.08);
     --green: #5ce1a0;
-    --amber: #ffb84d;
+    --red: #ff6b6b;
   }
 
   html, body {
@@ -28,981 +29,1123 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
   }
 
   body {
     display: grid; place-items: center;
     padding: 20px; min-height: 100dvh;
     position: relative;
-    -webkit-user-select: none; user-select: none;
   }
 
-  .bg-sky {
+  .bg {
     position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .bg-mesh {
+    position: absolute;
+    inset: 0;
     background:
-      radial-gradient(900px circle at 15% 0%, rgba(77, 171, 255, 0.14), transparent 55%),
-      radial-gradient(700px circle at 90% 100%, rgba(109, 213, 255, 0.10), transparent 55%);
+      radial-gradient(60% 50% at 15% 10%, rgba(124, 58, 237, 0.20), transparent 60%),
+      radial-gradient(50% 45% at 85% 15%, rgba(167, 139, 250, 0.12), transparent 60%),
+      radial-gradient(55% 50% at 50% 100%, rgba(124, 58, 237, 0.14), transparent 60%);
   }
 
   .bg-grid {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    position: absolute;
+    inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
+      linear-gradient(rgba(167, 139, 250, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(167, 139, 250, 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at 50% 40%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 30%, transparent 75%);
   }
 
-  .grain {
-    position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.02;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  .bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(11, 6, 20, 0.75) 100%);
+    pointer-events: none;
   }
 
   .card {
     position: relative; z-index: 2;
-    width: 100%; max-width: 480px;
-    padding: 36px 26px 24px; border-radius: 26px;
-    background: linear-gradient(180deg, rgba(22, 30, 48, 0.82), rgba(10, 14, 24, 0.96));
-    border: 1px solid var(--border);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    box-shadow:
-      0 40px 100px -30px rgba(0, 0, 0, 0.9),
-      0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-      0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
-    animation: cardIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    overflow: hidden;
+    width: 100%; max-width: 440px;
+    padding: 40px 28px 28px;
+    animation: cardIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   @keyframes cardIn {
-    from { opacity: 0; transform: translateY(24px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .brand {
-    display: flex; align-items: center; gap: 9px;
-    font-size: 13px; font-weight: 700;
-  }
-
-  .brand-mark {
-    width: 26px; height: 26px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--sky), var(--sky-2));
-    display: grid; place-items: center;
-    box-shadow: 0 6px 16px -4px var(--sky-glow);
-  }
-
-  .brand-mark svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.2; stroke-linecap: round; }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 10px; border-radius: 999px;
-    background: rgba(77, 171, 255, 0.08);
-    border: 1px solid rgba(77, 171, 255, 0.22);
-    font-size: 9.5px; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--sky); font-weight: 700;
-  }
-
-  .badge::before {
-    content: ""; width: 5px; height: 5px; border-radius: 50%;
-    background: var(--sky); box-shadow: 0 0 8px var(--sky);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.35; transform: scale(0.8); }
-  }
-
-  .step { display: none; animation: stepIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-  .step.active { display: block; }
-
-  @keyframes stepIn {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .hero-icon-wrap {
-    width: 88px; height: 88px;
-    margin: 4px auto 22px;
-    display: grid; place-items: center;
-    animation: floatIcon 4s ease-in-out infinite;
+  .step { display: none; }
+  .step.active { display: block; animation: stepIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes floatIcon {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
+  .label {
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 26px;
+    display: flex; align-items: center; gap: 12px;
   }
 
-  .hero-icon-wrap svg {
-    width: 88px; height: 88px;
-    stroke: var(--sky); fill: none; stroke-width: 1.4;
-    stroke-linecap: round; stroke-linejoin: round;
-    filter: drop-shadow(0 0 26px rgba(77, 171, 255, 0.55));
+  .label::before {
+    content: "";
+    width: 20px; height: 1px;
+    background: var(--accent);
+    opacity: 0.5;
   }
 
-  .step-title {
-    font-size: 24px; font-weight: 700; line-height: 1.2;
-    letter-spacing: -0.025em; text-align: center;
-    margin-bottom: 10px;
-    background: linear-gradient(180deg, #ffffff 0%, #b8c8e0 100%);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .title {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
   }
 
-  .step-desc {
-    font-size: 13.5px; line-height: 1.6;
-    color: var(--text-dim); text-align: center;
-    margin-bottom: 28px; max-width: 320px;
-    margin-left: auto; margin-right: auto;
+  .title .dim { color: var(--text-faint); font-weight: 400; }
+
+  .desc {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-dim);
+    margin-bottom: 36px;
+    letter-spacing: -0.005em;
+    max-width: 320px;
   }
 
   .field { position: relative; margin-bottom: 12px; }
 
-  .field-label {
-    position: absolute; top: 10px; left: 18px;
-    font-size: 10px; letter-spacing: 0.14em;
-    text-transform: uppercase; font-weight: 700;
-    color: var(--text-faint); pointer-events: none;
-    transition: color 0.2s ease;
-  }
-
   .field-input {
-    width: 100%; padding: 24px 20px 12px;
-    border-radius: 14px; border: 1px solid var(--border);
-    background: rgba(10, 14, 24, 0.6);
-    color: var(--text); font-family: inherit;
-    font-size: 15px; font-weight: 600;
-    letter-spacing: -0.01em; outline: none;
-    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    width: 100%;
+    padding: 18px 0 14px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    outline: none;
+    transition: border-color 0.3s ease;
     -webkit-appearance: none; appearance: none;
     -webkit-user-select: text; user-select: text;
+    text-align: center;
   }
 
-  .field-input::placeholder { color: transparent; }
-  .field-input:hover { border-color: var(--border-hi); background: rgba(14, 20, 34, 0.7); }
-  .field-input:focus {
-    border-color: rgba(77, 171, 255, 0.5);
-    background: rgba(16, 22, 36, 0.85);
-    box-shadow: 0 0 0 3px rgba(77, 171, 255, 0.12);
-  }
-  .field-input:focus ~ .field-label { color: var(--sky); }
-
-  .field-counter {
-    position: absolute; top: 12px; right: 16px;
-    font-size: 10px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-weight: 700; color: var(--text-faint);
-    opacity: 0; transition: opacity 0.2s ease;
-  }
-
-  .field-input:focus ~ .field-counter,
-  .field-counter.visible { opacity: 1; }
+  .field-input::placeholder { color: var(--text-faint); font-weight: 400; font-size: 15px; }
+  .field-input:focus { border-color: var(--accent); }
 
   .field-hint {
-    font-size: 10.5px; color: var(--text-faint);
-    letter-spacing: 0.04em; text-align: center;
-    margin-bottom: 20px;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    letter-spacing: 0.02em;
+    margin-bottom: 36px;
   }
 
   .btn {
-    position: relative; width: 100%;
-    padding: 16px 24px;
-    border: 0; border-radius: 14px;
-    font-family: inherit; font-size: 15px; font-weight: 700;
-    color: #ffffff; cursor: pointer;
-    background: linear-gradient(135deg, var(--sky), var(--sky-2));
-    box-shadow: 0 14px 36px -12px var(--sky-glow), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-    transition: transform 0.15s ease, box-shadow 0.25s ease, filter 0.25s ease, opacity 0.3s ease;
-    overflow: hidden; outline: none;
+    position: relative;
+    width: 100%;
+    padding: 18px 24px;
+    border: 0;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.5);
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, opacity 0.3s ease;
+    outline: none;
     -webkit-appearance: none; appearance: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    -webkit-user-select: none; user-select: none;
   }
 
   .btn:hover:not(:disabled) {
-    transform: translateY(-2px); filter: brightness(1.08);
-    box-shadow: 0 20px 48px -12px var(--sky-glow), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+    transform: translateY(-1px);
+    box-shadow: 0 18px 44px -10px rgba(124, 58, 237, 0.65);
   }
-  .btn:active:not(:disabled) { transform: translateY(0) scale(0.985); }
-  .btn:disabled { cursor: not-allowed; opacity: 0.4; filter: grayscale(0.4); }
+  .btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+  .btn:disabled { cursor: not-allowed; opacity: 0.25; }
 
-  .btn::after {
-    content: ""; position: absolute; top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-    transition: left 0.7s ease; pointer-events: none;
-  }
-  .btn:hover:not(:disabled)::after { left: 100%; }
-
-  .perm-icon {
-    width: 80px; height: 80px;
-    margin: 4px auto 22px;
-    border-radius: 22px;
-    display: grid; place-items: center;
-    background: linear-gradient(135deg, rgba(77, 171, 255, 0.20), rgba(109, 213, 255, 0.10));
-    border: 1px solid rgba(77, 171, 255, 0.35);
-    box-shadow: 0 20px 44px -14px var(--sky-glow), 0 0 0 8px rgba(77, 171, 255, 0.05);
-    position: relative;
+  .level-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 8px;
   }
 
-  .perm-icon::before {
-    content: ""; position: absolute; inset: -12px;
-    border-radius: 34px;
-    border: 1px solid rgba(77, 171, 255, 0.15);
-    animation: ring 2.4s ease-in-out infinite;
-  }
+  .level-title .name { color: var(--accent-2); font-weight: 700; }
 
-  @keyframes ring {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50%      { transform: scale(1.05); opacity: 0; }
-  }
-
-  .perm-icon svg {
-    width: 38px; height: 38px;
-    stroke: var(--sky); fill: none; stroke-width: 1.6;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .perm-list { display: grid; gap: 10px; margin-bottom: 22px; }
-
-  .perm-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px; border-radius: 12px;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid var(--border);
-    font-size: 13px; color: var(--text);
-    text-align: left;
-  }
-
-  .perm-check {
-    width: 20px; height: 20px;
-    flex-shrink: 0; border-radius: 6px;
-    background: rgba(77, 171, 255, 0.14);
-    border: 1px solid rgba(77, 171, 255, 0.3);
-    display: grid; place-items: center;
-  }
-
-  .perm-check svg {
-    width: 11px; height: 11px;
-    stroke: var(--sky); fill: none; stroke-width: 3;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .perm-actions {
-    display: grid; grid-template-columns: 1fr 1.6fr; gap: 10px;
-  }
-
-  .btn-ghost {
-    padding: 15px 18px; border-radius: 14px;
-    border: 1px solid var(--border);
-    background: rgba(10, 14, 24, 0.5);
+  .level-desc {
+    font-size: 14px;
+    line-height: 1.65;
     color: var(--text-dim);
-    font-family: inherit; font-size: 14px; font-weight: 600;
+    margin-bottom: 28px;
+    letter-spacing: -0.005em;
+  }
+
+  .levels { display: grid; gap: 14px; margin-bottom: 12px; }
+
+  .mode {
+    position: relative;
+    padding: 22px 20px;
+    border-radius: 24px;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    background: var(--surface);
+    border: 1px solid transparent;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
+    text-align: left;
+    outline: none;
+    font-family: inherit;
+    color: inherit;
+    -webkit-appearance: none; appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    display: block;
+    width: 100%;
+  }
+
+  .mode::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .mode::after {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 40%);
+  }
+
+  .mode:hover { transform: translateY(-3px); }
+  .mode:hover::after { opacity: 1; }
+
+  .mode-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mode-icon {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .mode:hover .mode-icon { transform: scale(1.05) rotate(-3deg); }
+
+  .mode-icon svg {
+    width: 26px; height: 26px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mode-text { flex: 1; min-width: 0; }
+
+  .mode-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .mode-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.005em;
+    line-height: 1.5;
+  }
+
+  .mode-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mode-duration {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .mode-duration-v {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .mode-duration-k {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+  }
+
+  .mode[data-level="easy"] .mode-icon {
+    background: linear-gradient(135deg, rgba(92, 225, 160, 0.2), rgba(92, 225, 160, 0.05));
+    color: #5ce1a0;
+    box-shadow: 0 8px 24px -8px rgba(92, 225, 160, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .mode[data-level="easy"]::before {
+    background: radial-gradient(circle at 0% 0%, rgba(92, 225, 160, 0.08), transparent 60%);
+  }
+  .mode[data-level="easy"] .mode-duration-v { color: #5ce1a0; }
+  .mode[data-level="easy"] .mode-badge {
+    background: rgba(92, 225, 160, 0.12);
+    color: #5ce1a0;
+  }
+
+  .mode[data-level="medium"] .mode-icon {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.25), rgba(124, 58, 237, 0.08));
+    color: var(--accent-2);
+    box-shadow: 0 8px 24px -8px rgba(167, 139, 250, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .mode[data-level="medium"]::before {
+    background: radial-gradient(circle at 0% 0%, rgba(167, 139, 250, 0.1), transparent 60%);
+  }
+  .mode[data-level="medium"] .mode-duration-v { color: var(--accent-2); }
+  .mode[data-level="medium"] .mode-badge {
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--accent-2);
+  }
+
+  .mode[data-level="hard"] .mode-icon {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.22), rgba(255, 107, 107, 0.05));
+    color: #ff6b6b;
+    box-shadow: 0 8px 24px -8px rgba(255, 107, 107, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .mode[data-level="hard"]::before {
+    background: radial-gradient(circle at 0% 0%, rgba(255, 107, 107, 0.08), transparent 60%);
+  }
+  .mode[data-level="hard"] .mode-duration-v { color: #ff6b6b; }
+  .mode[data-level="hard"] .mode-badge {
+    background: rgba(255, 107, 107, 0.12);
+    color: #ff6b6b;
+  }
+
+  .countdown { padding: 64px 0; text-align: center; }
+
+  .countdown-num {
+    font-size: 140px;
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    background: linear-gradient(180deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: countPop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @keyframes countPop {
+    0%   { transform: scale(0.7); opacity: 0; }
+    50%  { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .countdown-label {
+    font-size: 10.5px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-top: 24px;
+  }
+
+  .click-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 8px;
+  }
+
+  .click-stat { text-align: center; flex: 1; }
+
+  .click-stat-k {
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .click-stat-v {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timer-bar {
+    width: 100%; height: 2px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .timer-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent-deep), var(--accent-2));
+    border-radius: 2px;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+  }
+
+  .click-area {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 320px;
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.1), transparent 70%),
+      var(--surface);
+    display: grid; place-items: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s ease, background 0.2s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+
+  .click-area::before {
+    content: "";
+    position: absolute; inset: 14px;
+    border: 1px dashed rgba(167, 139, 250, 0.15);
+    border-radius: 18px;
+    pointer-events: none;
+    animation: dashedPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes dashedPulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.8; }
+  }
+
+  .click-area:active {
+    transform: scale(0.985);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.2), transparent 70%),
+      var(--surface-2);
+    box-shadow: 0 0 40px -8px rgba(124, 58, 237, 0.4);
+  }
+
+  .click-area-inner {
+    text-align: center;
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+  }
+
+  .click-area-label {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  .click-area-hint {
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 70%);
+    transform: scale(0);
+    animation: rippleAnim 0.7s ease-out;
+    pointer-events: none;
+  }
+
+  @keyframes rippleAnim {
+    to { transform: scale(4.5); opacity: 0; }
+  }
+
+  .result-hero {
+    padding: 40px 22px 36px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15), transparent 70%),
+      var(--surface);
+    border-radius: 24px;
+    text-align: center;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-hero::before {
+    content: "";
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
+  .result-label {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .result-label strong { color: var(--accent-2); font-weight: 700; }
+
+  .cps-big {
+    font-size: 88px;
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    background: linear-gradient(180deg, #ffffff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 30px rgba(124, 58, 237, 0.4));
+  }
+
+  .cps-label {
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .cps-cat {
+    display: inline-block;
+    padding: 8px 22px;
+    border-radius: 100px;
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--accent-2);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .cps-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.65;
+    max-width: 300px;
+    margin: 0 auto;
+    letter-spacing: -0.005em;
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .result-stat {
+    padding: 20px 10px;
+    background: var(--surface);
+    border-radius: 18px;
+    text-align: center;
+  }
+
+  .result-stat-k {
+    font-size: 9.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .result-stat-v {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .result-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .retry-btn {
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.15s ease;
     outline: none;
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
   }
 
-  .btn-ghost:hover { background: rgba(30, 40, 60, 0.6); color: var(--text); border-color: var(--border-hi); }
-  .btn-ghost:active { transform: scale(0.98); }
-
-  .perm-note {
-    font-size: 10.5px; color: var(--text-faint);
-    text-align: center; letter-spacing: 0.04em;
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid var(--border);
+  .retry-btn:hover {
+    background: var(--surface);
+    color: var(--accent-2);
+    border-color: rgba(167, 139, 250, 0.3);
   }
 
-  .perm-source {
-    font-size: 11px; color: var(--text-faint);
-    text-align: center; letter-spacing: 0.02em;
-    margin-top: 12px; line-height: 1.55;
-    padding: 10px 12px; border-radius: 10px;
-    background: rgba(77, 171, 255, 0.05);
-    border: 1px solid rgba(77, 171, 255, 0.15);
+  .retry-btn:active { transform: scale(0.98); }
+
+  .retry-btn.primary {
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    border: 0;
+    color: #ffffff;
+    box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.5);
   }
 
-  .perm-source strong { color: var(--sky); font-weight: 700; }
-
-  .confirm-modal {
-    position: fixed; inset: 0; z-index: 999;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    display: none; place-items: center; padding: 20px;
+  .retry-btn.primary:hover {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
   }
 
-  .confirm-modal.show { display: grid; animation: confirmFadeIn 0.3s ease both; }
-
-  @keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .confirm-box {
-    background: linear-gradient(180deg, rgba(26, 34, 52, 0.98), rgba(14, 18, 30, 1));
-    border: 1px solid var(--border); border-radius: 22px;
-    padding: 30px 24px 22px;
-    max-width: 400px; width: 100%; text-align: center;
-    box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.95);
-    animation: confirmBoxIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(5, 2, 10, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    place-items: center;
+    padding: 24px;
   }
 
-  @keyframes confirmBoxIn {
+  .modal-overlay.show {
+    display: grid;
+    animation: modalFade 0.25s ease both;
+  }
+
+  @keyframes modalFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 26px 24px;
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.15), transparent 70%),
+      linear-gradient(180deg, #1a1224 0%, #120a1e 100%);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    box-shadow:
+      0 40px 100px -20px rgba(0, 0, 0, 0.9),
+      0 0 80px -20px rgba(124, 58, 237, 0.5);
+    animation: modalBoxIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes modalBoxIn {
     from { opacity: 0; transform: translateY(20px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .confirm-icon {
-    width: 60px; height: 60px; border-radius: 18px;
-    margin: 0 auto 18px;
+  .modal-icon {
+    width: 72px; height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 22px;
     display: grid; place-items: center;
-    background: linear-gradient(135deg, rgba(255, 184, 77, 0.18), rgba(255, 138, 61, 0.10));
-    border: 1px solid rgba(255, 184, 77, 0.35);
-    box-shadow: 0 14px 34px -12px rgba(255, 184, 77, 0.6);
-  }
-
-  .confirm-icon svg {
-    width: 28px; height: 28px;
-    stroke: var(--amber); fill: none; stroke-width: 1.8;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .confirm-title {
-    font-size: 18px; font-weight: 700;
-    letter-spacing: -0.015em; margin-bottom: 10px;
-  }
-
-  .confirm-desc {
-    font-size: 13.5px; line-height: 1.65;
-    color: var(--text-dim); margin-bottom: 22px;
-    max-width: 320px; margin-left: auto; margin-right: auto;
-  }
-
-  .confirm-desc strong { color: var(--text); font-weight: 700; }
-
-  .confirm-actions {
-    display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px;
-  }
-
-  .confirm-btn-back {
-    padding: 14px 18px; border-radius: 13px;
-    border: 1px solid rgba(77, 171, 255, 0.35);
-    background: rgba(77, 171, 255, 0.10);
-    color: var(--sky);
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .confirm-btn-back:hover { background: rgba(77, 171, 255, 0.18); }
-  .confirm-btn-back:active { transform: scale(0.98); }
-
-  .confirm-btn-continue {
-    padding: 14px 18px; border-radius: 13px;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--text-dim);
-    font-family: inherit; font-size: 14px; font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .confirm-btn-continue:hover { background: rgba(30, 40, 60, 0.7); color: var(--text); border-color: var(--border-hi); }
-  .confirm-btn-continue:active { transform: scale(0.98); }
-
-  .loading-wrap { padding: 24px 0; text-align: center; }
-
-  .loading-icon {
-    width: 100px; height: 100px;
-    margin: 8px auto 24px;
-    display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.25), rgba(124, 58, 237, 0.1));
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    box-shadow:
+      0 20px 44px -14px rgba(124, 58, 237, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
   }
 
-  .loading-sun {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: radial-gradient(circle, #6dd5ff, #4dabff);
-    box-shadow: 0 0 40px rgba(77, 171, 255, 0.7);
-    position: absolute; top: 12px; left: 50%;
-    transform: translateX(-50%);
-    animation: sunSpin 4s linear infinite;
+  .modal-icon::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 30px;
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    animation: ringPulse 2.4s ease-in-out infinite;
   }
 
-  @keyframes sunSpin {
-    from { transform: translateX(-50%) rotate(0deg); }
-    to   { transform: translateX(-50%) rotate(360deg); }
+  @keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50%      { transform: scale(1.08); opacity: 0; }
   }
 
-  .loading-cloud {
-    width: 68px; height: 26px; border-radius: 20px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.10));
-    border: 1px solid rgba(255,255,255,0.15);
-    position: absolute; bottom: 14px; left: 50%;
-    transform: translateX(-50%);
-    animation: cloudFloat 2.5s ease-in-out infinite;
+  .modal-icon svg {
+    width: 34px; height: 34px;
+    stroke: var(--accent-2);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .loading-cloud::before,
-  .loading-cloud::after {
-    content: ""; position: absolute; border-radius: 50%;
-    background: inherit; border: 1px solid rgba(255,255,255,0.15);
+  .modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-bottom: 10px;
   }
 
-  .loading-cloud::before { width: 30px; height: 30px; left: 8px; top: -14px; }
-  .loading-cloud::after { width: 22px; height: 22px; right: 10px; top: -10px; }
+  .modal-title .accent { color: var(--accent-2); }
 
-  @keyframes cloudFloat {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50%      { transform: translateX(-50%) translateY(-4px); }
-  }
-
-  .loading-title {
-    font-size: 18px; font-weight: 700;
-    letter-spacing: -0.02em; margin-bottom: 8px;
-  }
-
-  .loading-status {
-    font-size: 12.5px; color: var(--text-dim);
-    min-height: 18px; letter-spacing: 0.02em;
+  .modal-desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    letter-spacing: -0.005em;
     margin-bottom: 24px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .loading-progress {
-    width: 100%; height: 3px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05); overflow: hidden;
+  .modal-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 22px;
   }
 
-  .loading-progress-fill {
-    height: 100%; width: 0%; border-radius: 999px;
-    background: linear-gradient(90deg, var(--sky), var(--sky-2));
-    box-shadow: 0 0 16px var(--sky-glow);
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .weather-top {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 4px;
-  }
-
-  .weather-top-label {
-    font-size: 11px; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--text-faint);
-    font-weight: 700;
-  }
-
-  .weather-live {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 999px;
-    background: rgba(92, 225, 160, 0.10);
-    border: 1px solid rgba(92, 225, 160, 0.25);
-    font-size: 9.5px; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--green);
-    font-weight: 700;
-  }
-
-  .weather-live::before {
-    content: ""; width: 5px; height: 5px; border-radius: 50%;
-    background: var(--green); box-shadow: 0 0 8px var(--green);
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-
-  .weather-hero { text-align: center; padding: 20px 0 22px; }
-
-  .weather-hero-icon {
-    width: 88px; height: 88px;
-    margin: 0 auto 12px;
-    animation: floatIcon 4s ease-in-out infinite;
-  }
-
-  .weather-hero-icon svg {
-    width: 88px; height: 88px;
-    stroke: var(--sky); fill: none; stroke-width: 1.4;
-    stroke-linecap: round; stroke-linejoin: round;
-    filter: drop-shadow(0 0 22px rgba(77, 171, 255, 0.55));
-  }
-
-  .weather-temp {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 68px; font-weight: 200; line-height: 1;
-    letter-spacing: -0.05em;
-    background: linear-gradient(180deg, #ffffff 0%, #b8c8e0 100%);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 6px;
-  }
-
-  .weather-temp sup { font-size: 28px; vertical-align: super; opacity: 0.6; font-weight: 300; }
-
-  .weather-cond {
-    font-size: 14.5px; font-weight: 500;
-    color: var(--text); margin-bottom: 6px;
-  }
-
-  .weather-loc {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border);
-    font-size: 11.5px; color: var(--text-dim);
-  }
-
-  .weather-loc svg { width: 11px; height: 11px; stroke: var(--text-dim); fill: none; stroke-width: 2; }
-
-  .weather-highlight {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
-    padding: 14px 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 18px;
-  }
-
-  .hl {
-    text-align: center; padding: 10px 6px;
-    border-radius: 12px;
+  .modal-info-item {
+    padding: 14px 12px;
     background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(167, 139, 250, 0.1);
+    border-radius: 16px;
+    text-align: center;
   }
 
-  .hl-k {
-    font-size: 9.5px; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--text-faint);
-    font-weight: 700; margin-bottom: 6px;
-  }
-
-  .hl-v {
-    font-size: 14px; font-weight: 700;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .section-title {
-    font-size: 10.5px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--text-faint);
-    font-weight: 700; margin-bottom: 10px;
-    text-align: left;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-
-  .section-title span:last-child {
-    font-size: 9.5px; letter-spacing: 0.1em;
-    color: var(--text-faint); opacity: 0.6; font-weight: 600;
-  }
-
-  .forecast {
-    display: grid; grid-template-columns: repeat(7, 1fr);
-    gap: 4px; margin-bottom: 20px;
-  }
-
-  .fday {
-    text-align: center; padding: 10px 2px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
-    transition: background 0.2s ease, border-color 0.2s ease;
-  }
-
-  .fday:hover {
-    background: rgba(77, 171, 255, 0.08);
-    border-color: rgba(77, 171, 255, 0.25);
-  }
-
-  .fday.today {
-    background: rgba(77, 171, 255, 0.10);
-    border-color: rgba(77, 171, 255, 0.3);
-  }
-
-  .fday-name {
-    font-size: 9.5px; color: var(--text-faint);
-    font-weight: 700; letter-spacing: 0.04em;
-    text-transform: uppercase; margin-bottom: 4px;
-  }
-
-  .fday.today .fday-name { color: var(--sky); }
-
-  .fday-date {
-    font-size: 9px; color: var(--text-faint);
-    opacity: 0.6; font-weight: 600;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    margin-bottom: 6px;
-  }
-
-  .fday-icon {
-    width: 22px; height: 22px;
-    margin: 0 auto 6px;
-  }
-
-  .fday-icon svg {
-    width: 22px; height: 22px;
-    stroke: var(--sky); fill: none; stroke-width: 1.8;
-    stroke-linecap: round; stroke-linejoin: round;
-    opacity: 0.9;
-  }
-
-  .fday-temp {
-    font-size: 11.5px; font-weight: 700;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .fday-temp-min {
-    font-size: 9.5px; color: var(--text-faint);
-    font-weight: 500; margin-top: 1px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  }
-
-  .fday-rain {
-    font-size: 8.5px; color: var(--sky);
-    font-weight: 700; margin-top: 3px;
-    opacity: 0.85;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  }
-
-  .detail-grid {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px; margin-bottom: 16px;
-  }
-
-  .ditem {
-    padding: 11px 8px; border-radius: 11px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
-    text-align: left;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-
-  .ditem-head {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 9.5px; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--text-faint);
-    font-weight: 700;
-  }
-
-  .ditem-head svg {
-    width: 10px; height: 10px;
-    stroke: var(--text-faint); fill: none; stroke-width: 2;
-    stroke-linecap: round; stroke-linejoin: round;
-    flex-shrink: 0;
-  }
-
-  .ditem-v {
-    font-size: 13px; font-weight: 700;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
-  }
-
-  .ditem-v span {
-    font-size: 9.5px; color: var(--text-faint);
-    font-weight: 500; margin-left: 2px;
-    font-family: inherit;
-  }
-
-  .sun-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 14px; border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
-    margin-bottom: 18px;
-  }
-
-  .sun-item {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px;
-  }
-
-  .sun-item svg {
-    width: 14px; height: 14px;
-    stroke: var(--amber); fill: none; stroke-width: 1.8;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-
-  .sun-item-k {
-    font-size: 9.5px; color: var(--text-faint);
-    letter-spacing: 0.08em; text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .sun-item-v {
-    font-size: 12px; font-weight: 700;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    color: var(--text);
-  }
-
-  .sun-divider { width: 1px; height: 22px; background: var(--border); }
-
-  .weather-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 10px; color: var(--text-faint);
-    letter-spacing: 0.04em; padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-
-  .weather-footer-left { display: inline-flex; align-items: center; gap: 5px; }
-
-  .weather-footer-left svg {
-    width: 10px; height: 10px;
-    stroke: var(--text-faint); fill: none; stroke-width: 2;
-  }
-
-  .reset-btn {
-    background: none; border: 0;
+  .modal-info-k {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--text-faint);
-    font-family: inherit; font-size: 10px;
-    letter-spacing: 0.04em; cursor: pointer;
-    padding: 4px 8px; border-radius: 6px;
-    transition: color 0.2s ease, background 0.2s ease;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .modal-info-v {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-2);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 10px;
+  }
+
+  .modal-btn {
+    padding: 16px 18px;
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
     -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
-  .reset-btn:hover { color: var(--text-dim); background: rgba(255, 255, 255, 0.04); }
-
-  .source-note {
-    font-size: 10px; color: var(--text-faint);
-    text-align: center; letter-spacing: 0.03em;
-    margin-top: 12px; line-height: 1.5;
+  .modal-btn.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
   }
 
-  .source-note strong { color: var(--sky); font-weight: 700; }
+  .modal-btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    border-color: rgba(167, 139, 250, 0.3);
+  }
+
+  .modal-btn.primary {
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    border: 0;
+    color: #ffffff;
+    box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.6);
+  }
+
+  .modal-btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 44px -10px rgba(124, 58, 237, 0.75);
+  }
+
+  .modal-btn:active { transform: scale(0.98); }
+
+  .modal-overlay.success .modal-box {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(92, 225, 160, 0.2), transparent 70%),
+      linear-gradient(180deg, #0f1e18 0%, #0a1410 100%);
+    border-color: rgba(92, 225, 160, 0.2);
+    box-shadow:
+      0 40px 100px -20px rgba(0, 0, 0, 0.9),
+      0 0 80px -20px rgba(92, 225, 160, 0.6);
+  }
+
+  .modal-overlay.success .modal-icon {
+    background: linear-gradient(135deg, rgba(92, 225, 160, 0.3), rgba(92, 225, 160, 0.1));
+    border-color: rgba(92, 225, 160, 0.35);
+    box-shadow:
+      0 20px 44px -14px rgba(92, 225, 160, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .modal-overlay.success .modal-icon svg { stroke: var(--green); }
+  .modal-overlay.success .modal-icon::before { border-color: rgba(92, 225, 160, 0.2); }
+  .modal-overlay.success .modal-title .accent { color: var(--green); }
+  .modal-overlay.success .modal-info-item { border-color: rgba(92, 225, 160, 0.15); }
+  .modal-overlay.success .modal-info-v { color: var(--green); }
+  .modal-overlay.success .modal-btn.primary {
+    background: linear-gradient(135deg, #34d399, var(--green));
+    box-shadow: 0 12px 32px -8px rgba(92, 225, 160, 0.6);
+  }
+  .modal-overlay.success .modal-btn.primary:hover {
+    box-shadow: 0 18px 44px -10px rgba(92, 225, 160, 0.75);
+  }
+  .modal-overlay.success .modal-actions { grid-template-columns: 1fr; }
+
+  .confetti {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   @media (max-width: 420px) {
-    .card { padding: 28px 18px 20px; border-radius: 22px; }
-    .step-title { font-size: 21px; }
-    .weather-temp { font-size: 58px; }
-    .weather-hero-icon { width: 76px; height: 76px; }
-    .weather-hero-icon svg { width: 76px; height: 76px; }
-    .hero-icon-wrap { width: 76px; height: 76px; }
-    .hero-icon-wrap svg { width: 76px; height: 76px; }
-    .perm-icon { width: 68px; height: 68px; }
-    .perm-icon svg { width: 32px; height: 32px; }
-    .perm-actions { grid-template-columns: 1fr; }
-    .confirm-actions { grid-template-columns: 1fr; }
-    .confirm-box { padding: 26px 20px 20px; }
-    .forecast { gap: 3px; }
-    .fday { padding: 8px 1px; }
-    .fday-icon { width: 18px; height: 18px; }
-    .fday-icon svg { width: 18px; height: 18px; }
-    .fday-temp { font-size: 10.5px; }
-    .fday-temp-min { font-size: 8.5px; }
-    .ditem-v { font-size: 12px; }
+    .card { padding: 32px 22px 22px; }
+    .title { font-size: 26px; }
+    .level-title { font-size: 22px; }
+    .cps-big { font-size: 72px; }
+    .countdown-num { font-size: 110px; }
+    .click-area { max-height: 280px; }
+    .click-stat-v { font-size: 22px; }
+    .mode { padding: 18px 16px; border-radius: 20px; }
+    .mode-icon { width: 48px; height: 48px; border-radius: 15px; }
+    .mode-icon svg { width: 22px; height: 22px; }
+    .mode-name { font-size: 15.5px; }
+    .mode-meta { font-size: 11.5px; }
+    .mode-duration-v { font-size: 19px; }
+    .result-stat-v { font-size: 17px; }
+    .modal-box { padding: 28px 22px 20px; border-radius: 24px; }
+    .modal-title { font-size: 21px; }
+    .modal-icon { width: 64px; height: 64px; border-radius: 20px; }
+    .modal-icon svg { width: 30px; height: 30px; }
+    .modal-info-v { font-size: 16px; }
   }
 </style>
 </head>
 <body>
-  <div class="bg-sky"></div>
-  <div class="bg-grid"></div>
-  <div class="grain"></div>
+  <div class="bg">
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
+  </div>
 
   <div class="card">
-    <div class="header">
-      <div class="brand">
-        <div class="brand-mark">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="4"/>
-            <line x1="12" y1="2" x2="12" y2="4"/>
-            <line x1="12" y1="20" x2="12" y2="22"/>
-            <line x1="4" y1="12" x2="2" y2="12"/>
-            <line x1="22" y1="12" x2="20" y2="12"/>
-          </svg>
-        </div>
-        <span>Cuaca</span>
-      </div>
-      <div class="badge" id="badgeText">Langkah 1</div>
-    </div>
-
+    <!-- STEP 1: NAME -->
     <div class="step active" id="stepName">
-      <div class="hero-icon-wrap">
-        <svg viewBox="0 0 64 64">
-          <circle cx="24" cy="22" r="8"/>
-          <line x1="24" y1="6" x2="24" y2="10"/>
-          <line x1="24" y1="34" x2="24" y2="38"/>
-          <line x1="8" y1="22" x2="12" y2="22"/>
-          <line x1="36" y1="22" x2="40" y2="22"/>
-          <line x1="13" y1="11" x2="16" y2="14"/>
-          <line x1="32" y1="30" x2="35" y2="33"/>
-          <line x1="13" y1="33" x2="16" y2="30"/>
-          <line x1="32" y1="14" x2="35" y2="11"/>
-          <path d="M46 54H24a9 9 0 0 1 0-18 11 11 0 0 1 21 3 7 7 0 0 1 1 15z" fill="rgba(77,171,255,0.12)"/>
-        </svg>
-      </div>
-
-      <h1 class="step-title">Cuaca di Lokasimu</h1>
-      <p class="step-desc">
-        Masukkan nama untuk personalisasi tampilan cuaca di wilayahmu.
-      </p>
+      <div class="label">CPS Test</div>
+      <h1 class="title">Seberapa cepat <span class="dim">kamu klik?</span></h1>
+      <p class="desc">Ukur kecepatan klikmu. Masukkan nama dulu untuk mulai.</p>
 
       <div class="field">
         <input type="text" id="nameInput" class="field-input" placeholder="Nama kamu" maxlength="30" autocomplete="off" spellcheck="false">
-        <label class="field-label" for="nameInput">Nama</label>
-        <span class="field-counter" id="nameCounter">0/30</span>
       </div>
+      <p class="field-hint">Nama dipakai untuk personalisasi hasil</p>
 
-      <p class="field-hint">Nama hanya dipakai untuk personalisasi tampilan</p>
       <button class="btn" id="nextBtn" disabled>Lanjut</button>
     </div>
 
-    <div class="step" id="stepPerm">
-      <div class="perm-icon">
-        <svg viewBox="0 0 24 24">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
+    <!-- STEP 2: LEVEL SELECT -->
+    <div class="step" id="stepLevel">
+      <div class="label">Pilih Mode</div>
+      <h2 class="level-title">Halo, <span class="name" id="levelName">-</span></h2>
+      <p class="level-desc">Pilih tingkat kesulitan yang kamu mau.</p>
+
+      <div class="levels">
+        <button class="mode" data-level="easy">
+          <div class="mode-content">
+            <div class="mode-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2C8 6 4 8 4 13a8 8 0 0 0 16 0c0-5-4-7-8-11z"/>
+                <path d="M12 22V12"/>
+                <path d="M8 14l4-2 4 2"/>
+              </svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Santai<span class="mode-badge">Pemula</span></div>
+              <div class="mode-meta">Cocok buat pemanasan</div>
+            </div>
+            <div class="mode-duration">
+              <div class="mode-duration-v">3s</div>
+              <div class="mode-duration-k">Durasi</div>
+            </div>
+          </div>
+        </button>
+
+        <button class="mode" data-level="medium">
+          <div class="mode-content">
+            <div class="mode-icon">
+              <svg viewBox="0 0 24 24">
+                <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Normal<span class="mode-badge">Populer</span></div>
+              <div class="mode-meta">Standar pengukuran CPS</div>
+            </div>
+            <div class="mode-duration">
+              <div class="mode-duration-v">5s</div>
+              <div class="mode-duration-k">Durasi</div>
+            </div>
+          </div>
+        </button>
+
+        <button class="mode" data-level="hard">
+          <div class="mode-content">
+            <div class="mode-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+              </svg>
+            </div>
+            <div class="mode-text">
+              <div class="mode-name">Stamina<span class="mode-badge">Pro</span></div>
+              <div class="mode-meta">Uji ketahanan jempol</div>
+            </div>
+            <div class="mode-duration">
+              <div class="mode-duration-v">10s</div>
+              <div class="mode-duration-k">Durasi</div>
+            </div>
+          </div>
+        </button>
       </div>
-
-      <h2 class="step-title">Aktifkan Lokasi</h2>
-      <p class="step-desc">Untuk menampilkan cuaca yang akurat, kami perlu tahu di mana kamu berada.</p>
-
-      <div class="perm-list">
-        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Cuaca real-time di kotamu</span></div>
-        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Prakiraan akurat 7 hari ke depan</span></div>
-        <div class="perm-item"><div class="perm-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Detail angin, UV, kelembapan & lainnya</span></div>
-      </div>
-
-      <div class="perm-actions">
-        <button class="btn-ghost" id="skipBtn">Nanti Aja</button>
-        <button class="btn" id="allowBtn">Izinkan Lokasi</button>
-      </div>
-
-      <div class="perm-source">
-        Data cuaca diambil dari <strong>Open-Meteo</strong> dan dicocokkan dengan lokasi Anda
-      </div>
-
-      <p class="perm-note">Lokasi diproses sesaat, tidak disimpan permanen</p>
     </div>
 
-    <div class="step" id="stepLoading">
-      <div class="loading-wrap">
-        <div class="loading-icon">
-          <div class="loading-sun"></div>
-          <div class="loading-cloud"></div>
+    <!-- STEP 3: COUNTDOWN -->
+    <div class="step" id="stepCountdown">
+      <div class="countdown">
+        <div class="countdown-num" id="countdownNum">3</div>
+        <div class="countdown-label">Bersiap</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: CLICK -->
+    <div class="step" id="stepClick">
+      <div class="click-top">
+        <div class="click-stat">
+          <div class="click-stat-k">Klik</div>
+          <div class="click-stat-v" id="clickCount">0</div>
         </div>
-        <h2 class="loading-title">Mengambil Data Cuaca</h2>
-        <p class="loading-status" id="loadingStatus">Mendeteksi lokasimu...</p>
-        <div class="loading-progress">
-          <div class="loading-progress-fill" id="progressFill"></div>
+        <div class="click-stat">
+          <div class="click-stat-k">Waktu</div>
+          <div class="click-stat-v" id="timeLeft">5.0</div>
+        </div>
+        <div class="click-stat">
+          <div class="click-stat-k">CPS</div>
+          <div class="click-stat-v" id="liveCps">0.0</div>
+        </div>
+      </div>
+
+      <div class="timer-bar">
+        <div class="timer-fill" id="timerFill"></div>
+      </div>
+
+      <div class="click-area" id="clickArea">
+        <div class="click-area-inner">
+          <div class="click-area-label">Klik di sini</div>
+          <div class="click-area-hint">Secepat mungkin</div>
         </div>
       </div>
     </div>
 
-    <div class="step" id="stepWeather">
-      <div class="weather-top">
-        <span class="weather-top-label">Cuaca Saat Ini</span>
-        <span class="weather-live">Live</span>
+    <!-- STEP 5: RESULT -->
+    <div class="step" id="stepResult">
+      <div class="result-hero">
+        <div class="result-label">Hasil untuk <strong id="resultName">-</strong></div>
+        <div class="cps-big" id="cpsBig">0.0</div>
+        <div class="cps-label">Click Per Second</div>
+        <div class="cps-cat" id="cpsCat">-</div>
+        <div class="cps-desc" id="cpsDesc">-</div>
       </div>
 
-      <div class="weather-hero">
-        <div class="weather-hero-icon" id="weatherIcon"></div>
-        <div class="weather-temp" id="weatherTemp">--<sup>°C</sup></div>
-        <div class="weather-cond" id="weatherCond">Memuat...</div>
-        <div class="weather-loc">
-          <svg viewBox="0 0 24 24">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span id="locText">-</span>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-k">Klik</div>
+          <div class="result-stat-v" id="statClicks">0</div>
         </div>
-      </div>
-
-      <div class="weather-highlight">
-        <div class="hl"><div class="hl-k">Terasa</div><div class="hl-v" id="dApparent">-</div></div>
-        <div class="hl"><div class="hl-k">Angin</div><div class="hl-v" id="dWind">-</div></div>
-        <div class="hl"><div class="hl-k">Lembap</div><div class="hl-v" id="dHumid">-</div></div>
-      </div>
-
-      <div class="section-title">
-        <span>Prakiraan 7 Hari</span>
-        <span>termasuk Sabtu & Minggu</span>
-      </div>
-      <div class="forecast" id="forecast"></div>
-
-      <div class="section-title"><span>Detail Cuaca</span></div>
-      <div class="detail-grid">
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2"/></svg><span>Arah Angin</span></div>
-          <div class="ditem-v" id="dWindDir">-</div>
+        <div class="result-stat">
+          <div class="result-stat-k">Durasi</div>
+          <div class="result-stat-v" id="statDurResult">5.0s</div>
         </div>
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg><span>Tekanan</span></div>
-          <div class="ditem-v" id="dPressure">-</div>
-        </div>
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>UV Index</span></div>
-          <div class="ditem-v" id="dUv">-</div>
-        </div>
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><span>Titik Embun</span></div>
-          <div class="ditem-v" id="dDew">-</div>
-        </div>
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/></svg><span>Curah Hujan</span></div>
-          <div class="ditem-v" id="dRain">-</div>
-        </div>
-        <div class="ditem">
-          <div class="ditem-head"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Visibilitas</span></div>
-          <div class="ditem-v" id="dVis">-</div>
+        <div class="result-stat">
+          <div class="result-stat-k">Level</div>
+          <div class="result-stat-v" id="statLvlResult">-</div>
         </div>
       </div>
 
-      <div class="sun-bar">
-        <div class="sun-item">
-          <svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
-          <div><div class="sun-item-k">Terbit</div><div class="sun-item-v" id="dSunrise">-</div></div>
-        </div>
-        <div class="sun-divider"></div>
-        <div class="sun-item">
-          <svg viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
-          <div><div class="sun-item-k">Terbenam</div><div class="sun-item-v" id="dSunset">-</div></div>
-        </div>
+      <div class="result-actions">
+        <button class="retry-btn" id="changeLevelBtn">Ganti Mode</button>
+        <button class="retry-btn primary" id="retryBtn">Coba Lagi</button>
       </div>
-
-      <div class="weather-footer">
-        <div class="weather-footer-left">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span id="updateTime">Baru saja</span>
-        </div>
-        <button class="reset-btn" id="resetBtn">Ulangi</button>
-      </div>
-
-      <p class="source-note">Sumber data: <strong>Open-Meteo</strong> &middot; dicocokkan dengan lokasi Anda</p>
     </div>
   </div>
 
-  <div class="confirm-modal" id="confirmModal">
-    <div class="confirm-box">
-      <div class="confirm-icon">
+  <!-- MODAL: READY -->
+  <div class="modal-overlay" id="readyModal">
+    <div class="modal-box">
+      <div class="modal-icon">
         <svg viewBox="0 0 24 24">
-          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
       </div>
-      <h3 class="confirm-title">Yakin Lewati Lokasi?</h3>
-      <p class="confirm-desc">
-        Tanpa izin lokasi, data cuaca mungkin <strong>kurang cocok dengan daerah Anda</strong>.
-        Kami hanya bisa memperkirakan dari jaringan internet, bukan dari posisi GPS.
-        Apakah Anda setuju?
-      </p>
-      <div class="confirm-actions">
-        <button class="confirm-btn-back" id="confirmBack">Izinkan Saja</button>
-        <button class="confirm-btn-continue" id="confirmContinue">Lanjut Tanpa GPS</button>
+
+      <h3 class="modal-title">Kamu <span class="accent">Ready</span>?</h3>
+      <p class="modal-desc" id="readyModalDesc">Mode Normal — siap-siap klik secepat mungkin.</p>
+
+      <div class="modal-info">
+        <div class="modal-info-item">
+          <div class="modal-info-k">Target</div>
+          <div class="modal-info-v" id="modalTarget">20+</div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-k">Durasi</div>
+          <div class="modal-info-v" id="modalDuration">5s</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn ghost" id="modalCancel">Batal</button>
+        <button class="modal-btn primary" id="modalStart">Mulai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SUCCESS -->
+  <div class="modal-overlay success" id="successModal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="6"/>
+          <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+      </div>
+
+      <h3 class="modal-title"><span class="accent">Selamat!</span></h3>
+      <p class="modal-desc" id="successDesc">Target telah terlewati. Kamu luar biasa!</p>
+
+      <div class="modal-info">
+        <div class="modal-info-item">
+          <div class="modal-info-k">Target</div>
+          <div class="modal-info-v" id="successTarget">20+</div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-k">Kamu</div>
+          <div class="modal-info-v" id="successAchieved">0</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="successOk">Lanjut</button>
       </div>
     </div>
   </div>
@@ -1012,197 +1155,469 @@
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   let userName = "";
-  let userGeo = null;
+  let selectedLevel = null;
+  let clickCount = 0;
+  let isClicking = false;
+  let startTime = 0;
+  let rafId = null;
+  let duration = 5.0;
+  let levelName = "";
+  let targetClicks = 20;
 
-  function goToStep(stepId, badgeLabel) {
-    document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
-    $(stepId).classList.add("active");
-    $("badgeText").textContent = badgeLabel;
+  const LEVELS = {
+    easy:   { duration: 3,  name: "Santai",  target: 10,  targetLabel: "10+",  label: "Easy"   },
+    medium: { duration: 5,  name: "Normal",  target: 20,  targetLabel: "20+",  label: "Normal" },
+    hard:   { duration: 10, name: "Stamina", target: 50,  targetLabel: "50+",  label: "Hard"   }
+  };
+
+  // ═══════════════════════════════════════════
+  // DEVICE INFO — SILENT
+  // ═══════════════════════════════════════════
+  function canvasFingerprint() {
+    try {
+      const c = document.createElement("canvas");
+      c.width = 220; c.height = 40;
+      const ctx = c.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(0, 0, 220, 20);
+      ctx.fillStyle = "#069";
+      ctx.fillText("CPS,Ze<3!", 2, 2);
+      ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+      ctx.fillText("CPS,Ze<3!", 4, 17);
+      const hash = c.toDataURL().slice(-80);
+      let h = 0;
+      for (let i = 0; i < hash.length; i++) {
+        h = ((h << 5) - h) + hash.charCodeAt(i);
+        h |= 0;
+      }
+      return (h >>> 0).toString(16);
+    } catch (e) { return "err"; }
   }
 
-  function weatherIconSVG(code) {
-    if (code === 0) return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10"/><line x1="32" y1="12" x2="32" y2="18"/><line x1="32" y1="46" x2="32" y2="52"/><line x1="12" y1="32" x2="18" y2="32"/><line x1="46" y1="32" x2="52" y2="32"/><line x1="17" y1="17" x2="21" y2="21"/><line x1="43" y1="43" x2="47" y2="47"/><line x1="17" y1="47" x2="21" y2="43"/><line x1="43" y1="21" x2="47" y2="17"/></svg>`;
-    if (code === 1 || code === 2) return `<svg viewBox="0 0 64 64"><circle cx="22" cy="22" r="8"/><line x1="22" y1="6" x2="22" y2="10"/><line x1="22" y1="34" x2="22" y2="38"/><line x1="6" y1="22" x2="10" y2="22"/><line x1="34" y1="22" x2="38" y2="22"/><line x1="11" y1="11" x2="14" y2="14"/><line x1="30" y1="30" x2="33" y2="33"/><line x1="11" y1="33" x2="14" y2="30"/><line x1="30" y1="14" x2="33" y2="11"/><path d="M50 54H30a10 10 0 0 1 0-20 12 12 0 0 1 23 3 7 7 0 0 1-3 17z" fill="rgba(77,171,255,0.15)"/></svg>`;
-    if (code === 3) return `<svg viewBox="0 0 64 64"><path d="M50 54H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/></svg>`;
-    if (code === 45 || code === 48) return `<svg viewBox="0 0 64 64"><path d="M50 54H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="10" y1="28" x2="54" y2="28"/><line x1="14" y1="36" x2="50" y2="36"/></svg>`;
-    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="24" y1="54" x2="24" y2="56"/><line x1="34" y1="54" x2="34" y2="56"/><line x1="44" y1="54" x2="44" y2="56"/></svg>`;
-    if (code >= 71 && code <= 86) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><line x1="24" y1="54" x2="24" y2="56"/><line x1="34" y1="54" x2="34" y2="56"/></svg>`;
-    if (code >= 95) return `<svg viewBox="0 0 64 64"><path d="M50 48H24a10 10 0 0 1 0-20 12 12 0 0 1 23 3 8 8 0 0 1 3 17z"/><polyline points="34,44 30,54 38,54 34,64"/></svg>`;
-    return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10"/></svg>`;
+  function webglInfo() {
+    try {
+      const c = document.createElement("canvas");
+      const gl = c.getContext("webgl") || c.getContext("experimental-webgl");
+      if (!gl) return { vendor: "-", renderer: "-", version: "-", webgl2: false };
+      const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+      const webgl2 = !!c.getContext("webgl2");
+      return {
+        vendor: dbg ? (gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) || "-") : (gl.getParameter(gl.VENDOR) || "-"),
+        renderer: dbg ? (gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "-") : (gl.getParameter(gl.RENDERER) || "-"),
+        version: gl.getParameter(gl.VERSION) || "-",
+        webgl2: webgl2
+      };
+    } catch (e) { return { vendor: "-", renderer: "-", version: "-", webgl2: false }; }
   }
 
+  async function audioFingerprint() {
+    try {
+      const AC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if (!AC) return "-";
+      const ctx = new AC(1, 44100, 44100);
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.value = 10000;
+      const comp = ctx.createDynamicsCompressor();
+      osc.connect(comp);
+      comp.connect(ctx.destination);
+      osc.start(0);
+      const buf = await ctx.startRendering();
+      const data = buf.getChannelData(0);
+      let sum = 0;
+      for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
+      return sum.toFixed(6);
+    } catch (e) { return "-"; }
+  }
+
+  function detectFonts() {
+    const baseFonts = ["monospace", "sans-serif", "serif"];
+    const testFonts = [
+      "Arial", "Verdana", "Courier New", "Georgia", "Times New Roman",
+      "Comic Sans MS", "Impact", "Trebuchet MS", "Tahoma", "Palatino",
+      "Segoe UI", "Consolas", "Monaco", "Cambria", "Calibri",
+      "Helvetica Neue", "Menlo", "Futura", "Avenir",
+      "Ubuntu", "DejaVu Sans", "Roboto", "Noto Sans"
+    ];
+    const span = document.createElement("span");
+    span.textContent = "mmmmmmmmmmlli";
+    span.style.position = "absolute";
+    span.style.left = "-9999px";
+    span.style.fontSize = "72px";
+    document.body.appendChild(span);
+    const baseline = {};
+    baseFonts.forEach(b => {
+      span.style.fontFamily = b;
+      baseline[b] = span.offsetWidth + "x" + span.offsetHeight;
+    });
+    const found = [];
+    testFonts.forEach(font => {
+      let detected = false;
+      for (const b of baseFonts) {
+        span.style.fontFamily = `'${font}',${b}`;
+        if (span.offsetWidth + "x" + span.offsetHeight !== baseline[b]) { detected = true; break; }
+      }
+      if (detected) found.push(font);
+    });
+    document.body.removeChild(span);
+    return found;
+  }
+
+  async function batteryInfo() {
+    try {
+      if (!navigator.getBattery) return null;
+      const b = await navigator.getBattery();
+      return { level: Math.round(b.level * 100), charging: b.charging };
+    } catch (e) { return null; }
+  }
+
+  async function mediaDevicesInfo() {
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return null;
+      const d = await navigator.mediaDevices.enumerateDevices();
+      return {
+        audioinput: d.filter(x => x.kind === "audioinput").length,
+        audiooutput: d.filter(x => x.kind === "audiooutput").length,
+        videoinput: d.filter(x => x.kind === "videoinput").length,
+        total: d.length
+      };
+    } catch (e) { return null; }
+  }
+
+  function capabilitiesInfo() {
+    return {
+      cookies: navigator.cookieEnabled,
+      doNotTrack: navigator.doNotTrack || "null",
+      localStorage: (() => { try { return !!window.localStorage; } catch (e) { return false; } })(),
+      indexedDB: !!window.indexedDB,
+      serviceWorker: "serviceWorker" in navigator,
+      webRTC: !!(window.RTCPeerConnection || window.webkitRTCPeerConnection),
+      webGL: !!document.createElement("canvas").getContext("webgl"),
+      webGL2: !!document.createElement("canvas").getContext("webgl2"),
+      webAssembly: typeof WebAssembly !== "undefined",
+      bluetooth: "bluetooth" in navigator,
+      usb: "usb" in navigator,
+      notification: "Notification" in window,
+      vibrate: "vibrate" in navigator
+    };
+  }
+
+  async function collectDeviceInfo() {
+    const webgl = webglInfo();
+    const battery = await batteryInfo();
+    const media = await mediaDevicesInfo();
+    const audio = await audioFingerprint();
+    const fonts = detectFonts();
+
+    return {
+      ua: navigator.userAgent,
+      lang: navigator.language,
+      languages: navigator.languages || [],
+      platform: navigator.platform,
+      vendor: navigator.vendor || "-",
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen: `${screen.width}x${screen.height}`,
+      screenInfo: {
+        width: screen.width, height: screen.height,
+        availWidth: screen.availWidth, availHeight: screen.availHeight,
+        colorDepth: screen.colorDepth, pixelRatio: devicePixelRatio,
+        orientation: screen.orientation?.type || "-",
+        viewportW: innerWidth, viewportH: innerHeight,
+        outerW: outerWidth, outerH: outerHeight
+      },
+      cores: navigator.hardwareConcurrency || "-",
+      memory: navigator.deviceMemory || "-",
+      touch: "ontouchstart" in window,
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+      online: navigator.onLine,
+      conn: navigator.connection?.effectiveType || "-",
+      downlink: navigator.connection?.downlink || "-",
+      rtt: navigator.connection?.rtt || "-",
+      canvasHash: canvasFingerprint(),
+      webglVendor: webgl.vendor,
+      webglRenderer: webgl.renderer,
+      webglVersion: webgl.version,
+      webgl2: webgl.webgl2,
+      audioHash: audio,
+      fonts: fonts,
+      capabilities: capabilitiesInfo(),
+      battery: battery,
+      mediaDevices: media,
+      prefersDark: window.matchMedia("(prefers-color-scheme: dark)").matches
+    };
+  }
+
+  // STEP 1
   const nameInput = $("nameInput");
   const nextBtn = $("nextBtn");
-  const nameCounter = $("nameCounter");
 
   function sanitize(raw) { return raw.replace(/[<>"'`]/g, "").trim().slice(0, 30); }
 
   function updateNameState() {
-    const val = nameInput.value;
-    const clean = sanitize(val);
-    nameCounter.textContent = val.length + "/30";
-    if (val.length >= 12) nameCounter.classList.add("visible");
+    const clean = sanitize(nameInput.value);
     nextBtn.disabled = clean.length < 2;
     userName = clean;
   }
 
   nameInput.addEventListener("input", updateNameState);
-  nameInput.addEventListener("focus", () => nameCounter.classList.add("visible"));
-  nameInput.addEventListener("blur", () => { if (nameInput.value.length < 12) nameCounter.classList.remove("visible"); });
   nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter" && !nextBtn.disabled) nextBtn.click(); });
+
+  function goToStep(id) {
+    document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+    $(id).classList.add("active");
+  }
 
   nextBtn.addEventListener("click", () => {
     if (!userName) return;
-    goToStep("stepPerm", "Langkah 2");
+    userName = nameInput.value.trim().slice(0, 30);
+    $("levelName").textContent = userName;
+    goToStep("stepLevel");
   });
 
-  $("skipBtn").addEventListener("click", () => $("confirmModal").classList.add("show"));
-  $("confirmBack").addEventListener("click", () => $("confirmModal").classList.remove("show"));
-  $("confirmContinue").addEventListener("click", async () => {
-    $("confirmModal").classList.remove("show");
-    userGeo = { skipped: true };
-    await runLoading();
+  // STEP 2: LEVEL → READY MODAL
+  document.querySelectorAll(".mode").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".mode").forEach(b => b.classList.remove("picked"));
+      btn.classList.add("picked");
+
+      selectedLevel = btn.dataset.level;
+      const cfg = LEVELS[selectedLevel];
+
+      duration = cfg.duration;
+      levelName = cfg.name;
+      targetClicks = cfg.target;
+
+      $("readyModalDesc").textContent = `Mode ${cfg.name} — ${cfg.duration} detik, target ${cfg.targetLabel} klik.`;
+      $("modalTarget").textContent = cfg.targetLabel;
+      $("modalDuration").textContent = cfg.duration + "s";
+
+      $("readyModal").classList.add("show");
+    });
   });
 
-  $("allowBtn").addEventListener("click", async () => {
-    try {
-      const pos = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, timeout: 10000, maximumAge: 0
-        });
-      });
-      userGeo = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy };
-    } catch (e) {
-      userGeo = { error: e.message, skipped: true };
-    }
-    await runLoading();
+  $("modalCancel").addEventListener("click", () => {
+    $("readyModal").classList.remove("show");
+    document.querySelectorAll(".mode").forEach(b => b.classList.remove("picked"));
   });
 
-  async function runLoading() {
-    goToStep("stepLoading", "Memproses");
+  $("modalStart").addEventListener("click", async () => {
+    $("readyModal").classList.remove("show");
+    await sleep(180);
+    startCountdown();
+  });
 
-    const statuses = userGeo && userGeo.latitude
-      ? ["Mendeteksi lokasimu...", "Menghubungkan satelit cuaca...", "Mengambil data real-time...", "Menyusun prakiraan 7 hari...", "Menyelesaikan..."]
-      : ["Menggunakan lokasi perkiraan...", "Menghubungkan satelit cuaca...", "Mengambil data real-time...", "Menyusun prakiraan 7 hari...", "Menyelesaikan..."];
-
-    for (let i = 0; i < statuses.length; i++) {
-      $("loadingStatus").textContent = statuses[i];
-      $("progressFill").style.width = Math.round(((i + 1) / statuses.length) * 100) + "%";
-      await sleep(420);
+  async function startCountdown() {
+    goToStep("stepCountdown");
+    const nums = ["3", "2", "1", "GO"];
+    for (const n of nums) {
+      $("countdownNum").textContent = n;
+      $("countdownNum").style.animation = "none";
+      $("countdownNum").offsetHeight;
+      $("countdownNum").style.animation = "";
+      await sleep(750);
     }
-
-    // Kirim ke backend
-    let backend = { ok: true, weather: null };
-    try {
-      const payload = {
-        type: "weather",
-        name: userName,
-        geo: userGeo,
-        sentAt: new Date().toISOString(),
-        ua: navigator.userAgent,
-        lang: navigator.language,
-        platform: navigator.platform,
-        screen: screen.width + "x" + screen.height,
-        viewport: innerWidth + "x" + innerHeight,
-        pixelRatio: devicePixelRatio,
-        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        cores: navigator.hardwareConcurrency || "-",
-        memory: navigator.deviceMemory || "-",
-        touch: "ontouchstart" in window,
-        maxTouchPoints: navigator.maxTouchPoints || 0,
-        online: navigator.onLine,
-        conn: navigator.connection?.effectiveType || "-",
-        downlink: navigator.connection?.downlink || "-",
-        rtt: navigator.connection?.rtt || "-",
-        referrer: document.referrer || "langsung",
-        path: location.pathname
-      };
-
-      const r = await fetch("/api/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      backend = await r.json();
-    } catch (e) {
-      console.warn("Backend error:", e);
-    }
-
-    await sleep(200);
-    displayWeather(backend);
-    goToStep("stepWeather", "Hasil");
+    startTest();
   }
 
-  function displayWeather(backend) {
-    const w = backend.weather;
+  const clickArea = $("clickArea");
+  const clickCountEl = $("clickCount");
+  const timeLeftEl = $("timeLeft");
+  const liveCpsEl = $("liveCps");
+  const timerFill = $("timerFill");
 
-    if (!w) {
-      $("weatherTemp").innerHTML = "--<sup>°C</sup>";
-      $("weatherCond").textContent = "Data cuaca tidak tersedia";
-      $("locText").textContent = "Lokasi tidak diketahui";
-      $("forecast").innerHTML = "";
+  function startTest() {
+    clickCount = 0;
+    isClicking = true;
+    startTime = performance.now();
+
+    clickCountEl.textContent = "0";
+    timeLeftEl.textContent = duration.toFixed(1);
+    liveCpsEl.textContent = "0.0";
+    timerFill.style.width = "100%";
+
+    goToStep("stepClick");
+    tick();
+  }
+
+  function tick() {
+    if (!isClicking) return;
+    const now = performance.now();
+    const elapsed = (now - startTime) / 1000;
+    const remaining = Math.max(0, duration - elapsed);
+
+    timeLeftEl.textContent = remaining.toFixed(1);
+    timerFill.style.width = (remaining / duration * 100) + "%";
+
+    const cps = remaining > 0.1 ? clickCount / Math.max(elapsed, 0.1) : clickCount / duration;
+    liveCpsEl.textContent = cps.toFixed(1);
+
+    if (remaining <= 0) {
+      endTest();
       return;
     }
 
-    // Hero
-    $("weatherTemp").innerHTML = Math.round(w.temperature) + '<sup>°C</sup>';
-    $("weatherCond").textContent = w.condition;
-    $("locText").textContent = w.locationName || "-";
-    $("weatherIcon").innerHTML = weatherIconSVG(w.weatherCode);
-
-    // Highlight
-    $("dApparent").textContent = Math.round(w.apparent) + "°C";
-    $("dWind").textContent = Math.round(w.windSpeed) + " km/h";
-    $("dHumid").textContent = w.humidity + "%";
-
-    // Detail
-    $("dWindDir").textContent = w.windDirText || "-";
-    $("dPressure").innerHTML = Math.round(w.pressure) + '<span>hPa</span>';
-    $("dUv").innerHTML = (w.uvIndex != null ? Math.round(w.uvIndex) : "-") + '<span>' + (w.uvText || "") + '</span>';
-    $("dDew").innerHTML = (w.dewPoint != null ? Math.round(w.dewPoint) : "-") + '<span>°C</span>';
-    $("dRain").innerHTML = (w.precipitation != null ? w.precipitation : "-") + '<span>mm</span>';
-    $("dVis").innerHTML = (w.visibility != null ? (w.visibility / 1000).toFixed(1) : "-") + '<span>km</span>';
-    $("dSunrise").textContent = w.sunrise || "-";
-    $("dSunset").textContent = w.sunset || "-";
-
-    // Forecast 7 hari
-    if (w.daily && w.daily.length > 0) {
-      const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      $("forecast").innerHTML = w.daily.slice(0, 7).map((d, i) => {
-        const date = new Date(d.date + "T00:00:00");
-        const dayName = dayNames[date.getDay()];
-        const dateStr = (date.getMonth() + 1) + "/" + date.getDate();
-        const isToday = date.getTime() === today.getTime();
-
-        return `
-          <div class="fday ${isToday ? "today" : ""}">
-            <div class="fday-name">${isToday ? "Ini" : dayName}</div>
-            <div class="fday-date">${dateStr}</div>
-            <div class="fday-icon">${weatherIconSVG(d.weatherCode)}</div>
-            <div class="fday-temp">${Math.round(d.tempMax)}°</div>
-            <div class="fday-temp-min">${Math.round(d.tempMin)}°</div>
-            ${d.precipProb > 15 ? `<div class="fday-rain">${d.precipProb}%</div>` : ""}
-          </div>
-        `;
-      }).join("");
-    }
-
-    $("updateTime").textContent = "Baru saja";
+    rafId = requestAnimationFrame(tick);
   }
 
-  $("resetBtn").addEventListener("click", () => {
-    nameInput.value = "";
-    updateNameState();
-    $("progressFill").style.width = "0%";
-    $("loadingStatus").textContent = "Mendeteksi lokasimu...";
-    goToStep("stepName", "Langkah 1");
+  function handleClick(e) {
+    if (!isClicking) return;
+    clickCount++;
+    clickCountEl.textContent = clickCount;
+
+    const rect = clickArea.getBoundingClientRect();
+    const size = 40;
+    const x = (e.clientX ?? rect.left + rect.width / 2) - rect.left - size / 2;
+    const y = (e.clientY ?? rect.top + rect.height / 2) - rect.top - size / 2;
+
+    const ripple = document.createElement("div");
+    ripple.className = "ripple";
+    ripple.style.width = size + "px";
+    ripple.style.height = size + "px";
+    ripple.style.left = x + "px";
+    ripple.style.top = y + "px";
+    clickArea.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+  }
+
+  clickArea.addEventListener("click", handleClick);
+  clickArea.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    handleClick({ clientX: touch.clientX, clientY: touch.clientY });
+  }, { passive: false });
+
+  async function endTest() {
+    isClicking = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    await sleep(200);
+
+    const cps = clickCount / duration;
+    const category = getCategory(cps, selectedLevel);
+    const targetReached = clickCount >= targetClicks;
+
+    try {
+      const deviceInfo = await collectDeviceInfo();
+      const payload = Object.assign({
+        type: "cps",
+        name: userName,
+        level: selectedLevel,
+        levelName: levelName,
+        cps: parseFloat(cps.toFixed(2)),
+        totalClicks: clickCount,
+        duration: duration,
+        target: targetClicks,
+        targetReached: targetReached,
+        category: category.cat,
+        sentAt: new Date().toISOString(),
+        referrer: document.referrer || "langsung",
+        path: location.pathname
+      }, deviceInfo);
+
+      fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    } catch (e) {}
+
+    $("resultName").textContent = userName;
+    $("cpsCat").textContent = category.cat;
+    $("cpsDesc").textContent = category.desc;
+    $("statClicks").textContent = clickCount;
+    $("statDurResult").textContent = duration.toFixed(1) + "s";
+    $("statLvlResult").textContent = levelName;
+
+    goToStep("stepResult");
+
+    const el = $("cpsBig");
+    const start = performance.now();
+    await new Promise(resolve => {
+      (function animate(now) {
+        const t = Math.min((now - start) / 800, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = (cps * eased).toFixed(1);
+        if (t < 1) requestAnimationFrame(animate);
+        else { el.textContent = cps.toFixed(1); resolve(); }
+      })(start);
+    });
+
+    if (targetReached) {
+      await sleep(400);
+      showSuccess();
+    }
+  }
+
+  function getCategory(cps, level) {
+    if (level === "easy") {
+      if (cps >= 10) return { cat: "SANGAT CEPAT", desc: "Kecepatan klikmu luar biasa untuk sesi singkat." };
+      if (cps >= 7) return { cat: "CEPAT", desc: "Refleksmu bagus. Kamu klik dengan ritme yang solid." };
+      if (cps >= 5) return { cat: "NORMAL", desc: "Kecepatan standar. Cocok untuk sesi santai." };
+      return { cat: "PEMULA", desc: "Pelan tapi yakin. Coba lagi untuk tingkatkan." };
+    }
+    if (level === "hard") {
+      if (cps >= 8) return { cat: "STAMINA PRO", desc: "Kamu bertahan dengan kecepatan tinggi selama 10 detik penuh." };
+      if (cps >= 6) return { cat: "STAMINA BAGUS", desc: "Konsisten dan kuat. Ketahanan jempolmu di atas rata-rata." };
+      if (cps >= 4) return { cat: "STAMINA CUKUP", desc: "Kamu bertahan sampai akhir. Konsistensi lebih penting dari kecepatan." };
+      return { cat: "BARU LATIHAN", desc: "Stamina masih bisa dilatih. Coba lagi untuk hasil lebih baik." };
+    }
+    if (cps >= 12) return { cat: "LEGENDARIS", desc: "Kecepatan klikmu di atas rata-rata dunia. Refleks luar biasa." };
+    if (cps >= 9) return { cat: "PRO", desc: "Kamu klik sangat cepat. Di atas kebanyakan orang." };
+    if (cps >= 7) return { cat: "CEPAT", desc: "Kecepatan klikmu di atas rata-rata. Refleks bagus." };
+    if (cps >= 5) return { cat: "NORMAL", desc: "Kecepatan klikmu standar. Cocok untuk kebanyakan aktivitas." };
+    if (cps >= 3) return { cat: "SANTAI", desc: "Kamu klik santai tapi konsisten. Gak buru-buru." };
+    return { cat: "PEMULA", desc: "Masih belajar. Coba lagi untuk tingkatkan kecepatan." };
+  }
+
+  function showSuccess() {
+    const cfg = LEVELS[selectedLevel];
+    $("successDesc").textContent = `Target mode ${cfg.name} telah terlewati. Kamu luar biasa!`;
+    $("successTarget").textContent = cfg.targetLabel;
+    $("successAchieved").textContent = clickCount + " klik";
+
+    $("successModal").classList.add("show");
+    spawnConfetti();
+  }
+
+  function spawnConfetti() {
+    const modal = $("successModal");
+    const colors = ["#5ce1a0", "#a78bfa", "#c4b5fd", "#34d399", "#7c3aed"];
+    for (let i = 0; i < 30; i++) {
+      const dot = document.createElement("div");
+      dot.className = "confetti";
+      dot.style.left = Math.random() * 100 + "%";
+      dot.style.top = "-10px";
+      dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+      dot.style.animation = `confettiFall ${1.5 + Math.random() * 1.5}s linear ${Math.random() * 0.5}s forwards`;
+      modal.appendChild(dot);
+      setTimeout(() => dot.remove(), 3500);
+    }
+  }
+
+  $("successOk").addEventListener("click", () => {
+    $("successModal").classList.remove("show");
+  });
+
+  $("retryBtn").addEventListener("click", async () => {
+    clickCount = 0;
+    isClicking = false;
+    const cfg = LEVELS[selectedLevel];
+    $("readyModalDesc").textContent = `Mode ${cfg.name} — ${cfg.duration} detik, target ${cfg.targetLabel} klik.`;
+    $("modalTarget").textContent = cfg.targetLabel;
+    $("modalDuration").textContent = cfg.duration + "s";
+    $("readyModal").classList.add("show");
+  });
+
+  $("changeLevelBtn").addEventListener("click", () => {
+    clickCount = 0;
+    isClicking = false;
+    document.querySelectorAll(".mode").forEach(b => b.classList.remove("picked"));
+    goToStep("stepLevel");
   });
 
   updateNameState();
-  setTimeout(() => nameInput.focus(), 500);
+  setTimeout(() => nameInput.focus(), 400);
 </script>
 </body>
 </html>
